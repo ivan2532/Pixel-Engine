@@ -25,6 +25,39 @@ struct DefaultVSOut
 		m_Test(test)
 	{
 	}
+
+	friend DefaultVSOut operator+(const DefaultVSOut& lhs, const DefaultVSOut& rhs)
+	{
+		return
+		{
+			lhs.m_Position + rhs.m_Position,
+			lhs.m_Test + rhs.m_Test
+		};
+	}
+	DefaultVSOut& operator+=(const DefaultVSOut& rhs) { return *this = *this + rhs; }
+
+	friend DefaultVSOut operator-(const DefaultVSOut& lhs, const DefaultVSOut& rhs)
+	{
+		return
+		{
+			lhs.m_Position - rhs.m_Position,
+			lhs.m_Test - rhs.m_Test
+		};
+	}
+	DefaultVSOut& operator-=(const DefaultVSOut& rhs) { return *this = *this - rhs; }
+	
+	friend DefaultVSOut operator*(const DefaultVSOut& lhs, float rhs)
+	{
+		return
+		{
+			lhs.m_Position * rhs,
+			lhs.m_Test * rhs
+		};
+	}
+	friend DefaultVSOut operator*(float lhs, const DefaultVSOut& rhs) { return rhs * lhs; }
+	DefaultVSOut& operator*=(float rhs) { return *this = *this * rhs; }
+
+	static DefaultVSOut Lerp(DefaultVSOut v1, DefaultVSOut v2, float t) { return v1 + (v2 - v1) * t; }
 };
 
 class DefaultVertexShader : public VertexShader<DefaultVSIn, DefaultVSOut>

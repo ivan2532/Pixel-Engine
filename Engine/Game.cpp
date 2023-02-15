@@ -24,15 +24,16 @@
 Game::Game( MainWindow& wnd )
 	:
 	wnd( wnd ),
-	gfx( wnd )
+	gfx( wnd ),
+	pipeline( gfx )
 {
 	pipeline.BindIndices({ 0, 1, 2 });
 	pipeline.BindVertices
 	(
 		{
-			Vec3{ 0, 0, 0 },
-			Vec3{ 1, 1, 1 },
-			Vec3{ 2, 2, 2 }
+			Vec3{ -0.2f, -0.2f, 0.0f },
+			Vec3{ 0.2f, -0.2f, 0.0f },
+			Vec3{ 0.0f, 0.2f, 0.0f }
 		}
 	);
 }
