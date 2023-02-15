@@ -23,6 +23,9 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "Graphics.h"
+#include "GraphicsPipeline.h"
+#include "DefaultVertexShader.h"
+#include "DefaultPixelShader.h"
 
 class Game
 {
@@ -40,6 +43,7 @@ private:
 private:
 	MainWindow& wnd;
 	Graphics gfx;
+	GraphicsPipeline<DefaultVertexShader, DefaultPixelShader> pipeline;
 	/********************************/
 	/*  User Variables              */
 	/********************************/

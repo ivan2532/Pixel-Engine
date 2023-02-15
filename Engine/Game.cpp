@@ -26,6 +26,15 @@ Game::Game( MainWindow& wnd )
 	wnd( wnd ),
 	gfx( wnd )
 {
+	pipeline.BindIndices({ 0, 1, 2 });
+	pipeline.BindVertices
+	(
+		{
+			Vec3{ 0, 0, 0 },
+			Vec3{ 1, 1, 1 },
+			Vec3{ 2, 2, 2 }
+		}
+	);
 }
 
 void Game::Go()
@@ -42,4 +51,5 @@ void Game::UpdateModel()
 
 void Game::ComposeFrame()
 {
+	pipeline.Draw();
 }
