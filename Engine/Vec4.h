@@ -27,7 +27,7 @@ public:
 	{
 	}
 
-	friend _Vec4 operator+(_Vec4 lhs, _Vec4 rhs)
+	friend _Vec4 operator+(const _Vec4& lhs, const _Vec4& rhs)
 	{
 		_Vec4 result;
 		result.x = lhs.x + rhs.x;
@@ -36,7 +36,7 @@ public:
 
 		return result;
 	}
-	_Vec4& operator+=(_Vec4 rhs)
+	_Vec4& operator+=(const _Vec4& rhs)
 	{
 		T originalW = this->w;
 		*this = *this + rhs;
@@ -45,7 +45,7 @@ public:
 		return *this;
 	}
 
-	friend _Vec4 operator-(_Vec4 lhs, _Vec4 rhs)
+	friend _Vec4 operator-(const _Vec4& lhs, const _Vec4& rhs)
 	{
 		_Vec4 result;
 		result.x = lhs.x - rhs.x;
@@ -54,7 +54,7 @@ public:
 
 		return result;
 	}
-	_Vec4& operator-=(_Vec4 rhs)
+	_Vec4& operator-=(const _Vec4& rhs)
 	{
 		T originalW = this->w;
 		*this = *this - rhs;
@@ -63,8 +63,8 @@ public:
 		return *this;
 	}
 
-	friend _Vec4 operator*(T lhs, _Vec4 rhs) { return _Vec4(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z); }
-	friend _Vec4 operator*(_Vec4 lhs, T rhs) { return rhs * lhs; }
+	friend _Vec4 operator*(T lhs, const _Vec4& rhs) { return _Vec4(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z); }
+	friend _Vec4 operator*(const _Vec4& lhs, T rhs) { return rhs * lhs; }
 	_Vec4& operator*=(T rhs)
 	{
 		T originalW = this->w;
@@ -74,11 +74,11 @@ public:
 		return *this;
 	}
 
-	static auto Dot(_Vec4 lhs, _Vec4 rhs)
+	static auto Dot(const _Vec4& lhs, const _Vec4& rhs)
 	{
 		return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
 	}
-	static _Vec4 Hadamard(_Vec4 lhs, _Vec4 rhs, bool ignoreW = true)
+	static _Vec4 Hadamard(const _Vec4& lhs, const _Vec4& rhs, bool ignoreW = false)
 	{
 		return _Vec4(
 			lhs.x * rhs.x,
@@ -87,7 +87,7 @@ public:
 			ignoreW ? (T)1.0 : lhs.w * rhs.w
 		);
 	}
-	static _Vec4 Cross(_Vec4 lhs, _Vec4 rhs)
+	static _Vec4 Cross(const _Vec4& lhs, const _Vec4& rhs)
 	{
 		return _Vec3::Cross(lhs, rhs);
 	}

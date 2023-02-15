@@ -14,7 +14,7 @@ public:
 	{
 	}
 
-	friend _Vec2 operator+(_Vec2 lhs, _Vec2 rhs)
+	friend _Vec2 operator+(const _Vec2& lhs, const _Vec2& rhs)
 	{
 		_Vec2 result;
 		result.x = lhs.x + rhs.x;
@@ -22,9 +22,9 @@ public:
 
 		return result;
 	}
-	_Vec2& operator+=(_Vec2 rhs) { return *this = *this + rhs; }
+	_Vec2& operator+=(const _Vec2& rhs) { return *this = *this + rhs; }
 
-	friend _Vec2 operator-(_Vec2 lhs, _Vec2 rhs)
+	friend _Vec2 operator-(const _Vec2& lhs, const _Vec2& rhs)
 	{
 		_Vec2 result;
 		result.x = lhs.x - rhs.x;
@@ -32,14 +32,14 @@ public:
 
 		return result;
 	}
-	_Vec2& operator-=(_Vec2 rhs) { return *this = *this - rhs; }
+	_Vec2& operator-=(const _Vec2& rhs) { return *this = *this - rhs; }
 
-	friend _Vec2 operator*(T lhs, _Vec2 rhs) { return _Vec2(lhs * rhs.x, lhs * rhs.y); }
-	friend _Vec2 operator*(_Vec2 lhs, T rhs) { return rhs * lhs; }
+	friend _Vec2 operator*(T lhs, const _Vec2& rhs) { return _Vec2(lhs * rhs.x, lhs * rhs.y); }
+	friend _Vec2 operator*(const _Vec2& lhs, T rhs) { return rhs * lhs; }
 	_Vec2& operator*=(T rhs) { return *this = *this * rhs; }
 
-	static auto Dot(_Vec2 lhs, _Vec2 rhs) { return lhs.x * rhs.x + lhs.y * rhs.y; }
-	static _Vec2 Hadamard(_Vec2 lhs, _Vec2 rhs) { return _Vec2(lhs.x * rhs.x, lhs.y * rhs.y); }
+	static auto Dot(const _Vec2& lhs, const _Vec2& rhs) { return lhs.x * rhs.x + lhs.y * rhs.y; }
+	static _Vec2 Hadamard(const _Vec2& lhs, const _Vec2& rhs) { return _Vec2(lhs.x * rhs.x, lhs.y * rhs.y); }
 
 	static constexpr _Vec2 Up()    { return _Vec2((T)0.0, (T)1.0); }
 	static constexpr _Vec2 Down()  { return _Vec2((T)0.0, (T)-1.0); }

@@ -12,7 +12,7 @@ public:
 
 	T* operator[](unsigned i) { return matrix[i]; }
 
-	friend _Mat4 operator+(_Mat4 lhs, _Mat4 rhs)
+	friend _Mat4 operator+(const _Mat4& lhs, const _Mat4& rhs)
 	{
 		_Mat4 result;
 		for (auto i = 0; i < 4; i++)
@@ -25,9 +25,9 @@ public:
 
 		return result;
 	}
-	_Mat4& operator+=(_Mat4 rhs) { return *this = *this + rhs; }
+	_Mat4& operator+=(const _Mat4& rhs) { return *this = *this + rhs; }
 
-	friend _Mat4 operator-(_Mat4 lhs, _Mat4 rhs)
+	friend _Mat4 operator-(const _Mat4& lhs, const _Mat4& rhs)
 	{
 		_Mat4 result;
 		for (auto i = 0; i < 4; i++)
@@ -40,9 +40,9 @@ public:
 
 		return result;
 	}
-	_Mat4& operator-=(_Mat4 rhs) { return *this = *this - rhs; }
+	_Mat4& operator-=(const _Mat4& rhs) { return *this = *this - rhs; }
 
-	friend _Mat4 operator*(T lhs, _Mat4 rhs)
+	friend _Mat4 operator*(T lhs, const _Mat4& rhs)
 	{
 		_Mat4 result;
 		for (auto i = 0; i < 4; i++)
@@ -55,13 +55,13 @@ public:
 
 		return result;
 	}
-	friend _Mat4 operator*(_Mat4 lhs, T rhs)
+	friend _Mat4 operator*(const _Mat4& lhs, T rhs)
 	{
 		return rhs * lhs;
 	}
 	_Mat4& operator*=(T rhs) { return *this = *this * rhs; }
 
-	friend _Mat4 operator*(_Mat4 lhs, _Mat4 rhs)
+	friend _Mat4 operator*(const _Mat4& lhs, const _Mat4& rhs)
 	{
 		_Mat4 result;
 		for (auto i = 0; i < 4; i++)
@@ -74,7 +74,17 @@ public:
 
 		return result;
 	}
-	_Mat4& operator*=(_Mat4 rhs) { return *this = *this * rhs; }
+	_Mat4& operator*=(const _Mat4& rhs) { return *this = *this * rhs; }
+
+	friend _Vec4<T> operator*(const _Mat4& lhs, const _Vec4<T>& rhs)
+	{
+		return
+		{
+			lhs[0][0] * rhs[0] + lhs[0][1] * rhs[1] + lhs[0][2] * rhs[2] + lhs[0][3] * rhs[3],
+			lhs[1][0] * rhs[0] + lhs[1][1] * rhs[1] + lhs[1][2] * rhs[2] + lhs[1][3] * rhs[3],
+			lhs[2][0] * rhs[0] + lhs[2][1] * rhs[1] + lhs[2][2] * rhs[2] + lhs[2][3] * rhs[3]
+		}
+	}
 
 	static constexpr _Mat4 Identity()
 	{
@@ -94,7 +104,7 @@ public:
 		(T)0.0, (T)0.0, (T)1.0, z,
 		(T)0.0, (T)0.0, (T)0.0, (T)1.0
 	}
-	static _Mat4 Translate(_Vec3<T> t)
+	static _Mat4 Translate(const _Vec3<T>& t)
 	{
 		(T)1.0, (T)0.0, (T)0.0, t.x,
 		(T)0.0, (T)1.0, (T)0.0, t.y,
@@ -143,7 +153,7 @@ public:
 			(T)0.0, (T)0.0, (T)0.0, (T)1.0
 		}
 	}
-	static _Mat4 Scale(_Vec3<T> s) { return Scale(s.x, s.y, s.z); }
+	static _Mat4 Scale(const _Vec3<T>& s) { return Scale(s.x, s.y, s.z); }
 
 	static _Mat4 OrthographicProjection(T near, T far, T orthographicSize, T aspectRatio)
 	{
@@ -180,4 +190,4 @@ public:
 };
 
 using Mat4 = _Mat4<float>;
-using Mai4= _Mat4<int>;
+using Mai4 = _Mat4<int>;

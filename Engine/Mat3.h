@@ -12,7 +12,7 @@ public:
 
 	T* operator[](unsigned i) { return matrix[i]; }
 
-	friend _Mat3 operator+(_Mat3 lhs, _Mat3 rhs)
+	friend _Mat3 operator+(const _Mat3& lhs, const _Mat3& rhs)
 	{
 		_Mat3 result;
 		for (auto i = 0; i < 3; i++)
@@ -25,9 +25,9 @@ public:
 
 		return result;
 	}
-	_Mat3& operator+=(_Mat3 rhs) { return *this = *this + rhs; }
+	_Mat3& operator+=(const _Mat3& rhs) { return *this = *this + rhs; }
 
-	friend _Mat3 operator-(_Mat3 lhs, _Mat3 rhs)
+	friend _Mat3 operator-(const _Mat3& lhs, const _Mat3& rhs)
 	{
 		_Mat3 result;
 		for (auto i = 0; i < 3; i++)
@@ -40,9 +40,9 @@ public:
 
 		return result;
 	}
-	_Mat3& operator-=(_Mat3 rhs) { return *this = *this - rhs; }
+	_Mat3& operator-=(const _Mat3& rhs) { return *this = *this - rhs; }
 
-	friend _Mat3 operator*(T lhs, _Mat3 rhs)
+	friend _Mat3 operator*(T lhs, const _Mat3& rhs)
 	{
 		_Mat3 result;
 		for (auto i = 0; i < 3; i++)
@@ -55,13 +55,13 @@ public:
 
 		return result;
 	}
-	friend _Mat3 operator*(_Mat3 lhs, T rhs)
+	friend _Mat3 operator*(const _Mat3& lhs, T rhs)
 	{
 		return rhs * lhs;
 	}
 	_Mat3& operator*=(T rhs) { return *this = *this * rhs; }
 
-	friend _Mat3 operator*(_Mat3 lhs, _Mat3 rhs)
+	friend _Mat3 operator*(const _Mat3& lhs, const _Mat3& rhs)
 	{
 		_Mat3 result;
 		for (auto i = 0; i < 3; i++)
@@ -74,7 +74,17 @@ public:
 
 		return result;
 	}
-	_Mat3& operator*=(_Mat3 rhs) { return *this = *this * rhs; }
+	_Mat3& operator*=(const _Mat3& rhs) { return *this = *this * rhs; }
+
+	friend _Vec3<T> operator*(const _Mat3& lhs, const _Vec3<T>& rhs)
+	{
+		return
+		{
+			lhs[0][0] * rhs[0] + lhs[0][1] * rhs[1] + lhs[0][2] * rhs[2],
+			lhs[1][0] * rhs[0] + lhs[1][1] * rhs[1] + lhs[1][2] * rhs[2],
+			lhs[2][0] * rhs[0] + lhs[2][1] * rhs[1] + lhs[2][2] * rhs[2]
+		}
+	}
 
 	static constexpr _Mat3 Identity()
 	{
@@ -123,7 +133,7 @@ public:
 			(T)0.0, (T)0.0,  z
 		}
 	}
-	static _Mat3 Scale(_Vec3<T> s) { return Scale(s.x, s.y, s.z); }
+	static _Mat3 Scale(const _Vec3<T>& s) { return Scale(s.x, s.y, s.z); }
 };
 
 using Mat3 = _Mat3<float>;
