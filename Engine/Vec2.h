@@ -34,12 +34,7 @@ public:
 	}
 	_Vec2& operator-=(const _Vec2& rhs) { return *this = *this - rhs; }
 
-	_Vec2& operator-()
-	{
-		x = -x;
-		y = -y;
-		return *this;
-	}
+	_Vec2 operator-() { return { -x, -y }; }
 
 	friend _Vec2 operator*(T lhs, const _Vec2& rhs) { return _Vec2(lhs * rhs.x, lhs * rhs.y); }
 	friend _Vec2 operator*(const _Vec2& lhs, T rhs) { return rhs * lhs; }

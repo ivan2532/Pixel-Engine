@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Vec3.h"
+#include "Mat4.h"
 #include "Colors.h"
 
 class VertexColorShaderProgram
@@ -21,10 +22,10 @@ public:
 
 	struct VSOut
 	{
-		Vec3 m_Position;
+		Vec4 m_Position;
 		Vec3 m_Color;
 
-		VSOut(Vec3 position, Vec3 color)
+		VSOut(Vec4 position, Vec3 color)
 			:
 			m_Position(position),
 			m_Color(color)
@@ -70,8 +71,14 @@ public:
 	public:
 		VSOut Main(const VSIn& vIn)
 		{
-			return VSOut(vIn.m_Position, vIn.m_Color);
+			Vec4 test = m_MVP * vIn.m_Position;
+			return VSOut(m_MVP * vIn.m_Position, vIn.m_Color);
 		}
+
+		void SetMVP(const Mat4& value) { m_MVP = value; }
+
+	private:
+		Mat4 m_MVP;
 	};
 
 	struct PSOut

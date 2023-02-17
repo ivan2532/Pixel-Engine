@@ -25,6 +25,7 @@
 #include "Graphics.h"
 #include "GraphicsPipeline.h"
 #include "VertexColorShaderProgram.h"
+#include "Mat4.h"
 
 class Game
 {
@@ -43,6 +44,11 @@ private:
 	MainWindow& wnd;
 	Graphics gfx;
 	GraphicsPipeline<VertexColorShaderProgram> pipeline;
+
+	Vec3 camPosition;
+	Vec3 trianglePosition;
+	Vec3 triangleEulerAngles;
+
 	/********************************/
 	/*  User Variables              */
 	/********************************/

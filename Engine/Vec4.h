@@ -74,13 +74,7 @@ public:
 		return *this;
 	}
 
-	_Vec4& operator-()
-	{
-		x = -x;
-		y = -y;
-		z = -z;
-		return *this;
-	}
+	_Vec4 operator-() { return { -x, -y, -z }; }
 
 	static auto Dot(const _Vec4& lhs, const _Vec4& rhs)
 	{

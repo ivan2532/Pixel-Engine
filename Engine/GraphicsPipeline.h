@@ -40,9 +40,9 @@ private:
 
 	void VertexProcessing();
 	void TriangleAssembly();
-	void Clipping(VSOut v1, VSOut v2, VSOut v3);
-	void ScreenMapping(VSOut v1, VSOut v2, VSOut v3);
-	void Rasterization(VSOut v1, VSOut v2, VSOut v3);
+	void Clipping(VSOut& v1, VSOut& v2, VSOut& v3);
+	void ScreenMapping(VSOut& v1, VSOut& v2, VSOut& v3);
+	void Rasterization(const VSOut& v1, const VSOut& v2, const VSOut& v3);
 	void PixelProcessing(VSOut fragment);
 	void Merging(PSOut p);
 
@@ -55,9 +55,9 @@ private:
 	void NDCSpaceToScreenSpaceVertex(VSOut& v);
 	void NDCSpaceToScreenSpaceTriangle(VSOut& v1, VSOut& v2, VSOut& v3);
 
-	void DrawFlatTopTriangle(VSOut& v1, VSOut& v2, VSOut& v3);
-	void DrawFlatBottomTriangle(VSOut& v1, VSOut& v2, VSOut& v3);
-	void DrawFlatTriangle(VSOut& bottom, VSOut& top, VSOut& leftFrom, VSOut& leftTo, VSOut& rightFrom, VSOut& rightTo);
+	void DrawFlatTopTriangle(const VSOut& v1, const VSOut& v2, const VSOut& v3);
+	void DrawFlatBottomTriangle(const VSOut& v1, const VSOut& v2, const VSOut& v3);
+	void DrawFlatTriangle(const VSOut& bottom, const VSOut& top, const VSOut& leftFrom, const VSOut& leftTo, const VSOut& rightFrom, const VSOut& rightTo);
 
 	#pragma endregion
 };
@@ -113,12 +113,9 @@ inline void GraphicsPipeline<ShaderProgram>::TriangleAssembly()
 }
 
 template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::Clipping(VSOut v1, VSOut v2, VSOut v3)
+inline void GraphicsPipeline<ShaderProgram>::Clipping(VSOut& v1, VSOut& v2, VSOut& v3)
 {
-	// Here we will have vertex positions in clip space, before the perspective division.
-
 	// Clip triangles completley out of the view volume
-	
 	// Left and right plane
 	if (v1.m_Position.x <= -v1.m_Position.w && v2.m_Position.x <= -v2.m_Position.w && v3.m_Position.x <= -v3.m_Position.w) return;
 	if (v1.m_Position.x >= v1.m_Position.w && v2.m_Position.x >= v2.m_Position.w && v3.m_Position.x >= v3.m_Position.w) return;
@@ -205,43 +202,42 @@ inline void GraphicsPipeline<ShaderProgram>::Clipping(VSOut v1, VSOut v2, VSOut 
 }
 
 template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::ScreenMapping(VSOut v1, VSOut v2, VSOut v3)
+inline void GraphicsPipeline<ShaderProgram>::ScreenMapping(VSOut& v1, VSOut& v2, VSOut& v3)
 {
 	NDCSpaceToScreenSpaceTriangle(v1, v2, v3);
 	Rasterization(v1, v2, v3);
 }
 
 template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::Rasterization(VSOut v1, VSOut v2, VSOut v3)
+inline void GraphicsPipeline<ShaderProgram>::Rasterization(const VSOut& v1, const VSOut& v2, const VSOut& v3)
 {
-	/*m_Graphics.PutPixel(v1.m_Position.x, v1.m_Position.y, Colors::White);
-	m_Graphics.PutPixel(v2.m_Position.x, v2.m_Position.y, Colors::White);
-	m_Graphics.PutPixel(v3.m_Position.x, v3.m_Position.y, Colors::White);*/
-
 	// Sort vertices by y (from bottom to top on screen)
 	// because the order could be messed up from clipping
-	if (v1.m_Position.y < v2.m_Position.y) std::swap(v1, v2);
-	if (v2.m_Position.y < v3.m_Position.y) std::swap(v2, v3);
-	if (v1.m_Position.y < v2.m_Position.y) std::swap(v1, v2);
+	const VSOut* pv1 = &v1;
+	const VSOut* pv2 = &v2;
+	const VSOut* pv3 = &v3;
+	if (pv1->m_Position.y < pv2->m_Position.y) std::swap(pv1, pv2);
+	if (pv2->m_Position.y < pv3->m_Position.y) std::swap(pv2, pv3);
+	if (pv1->m_Position.y < pv2->m_Position.y) std::swap(pv1, pv2);
 
-	if (v1.m_Position.y == v2.m_Position.y)
+	if (pv1->m_Position.y == pv2->m_Position.y)
 	{
-		DrawFlatBottomTriangle(v1, v2, v3);
+		DrawFlatBottomTriangle(*pv1, *pv2, *pv3);
 		return;
 	}
-	if (v2.m_Position.y == v3.m_Position.y)
+	if (pv2->m_Position.y == pv3->m_Position.y)
 	{
-		DrawFlatTopTriangle(v1, v2, v3);
+		DrawFlatTopTriangle(*pv1, *pv2, *pv3);
 		return;
 	}
 
 	// Split triangle into flat top, and flat bottom triangles
-	const float t = (v1.m_Position.y - v2.m_Position.y) / (v1.m_Position.y - v3.m_Position.y);
-	VSOut vSplit = VSOut::Lerp(v1, v3, t);
+	const float t = (pv1->m_Position.y - pv2->m_Position.y) / (pv1->m_Position.y - pv3->m_Position.y);
+	VSOut vSplit = VSOut::Lerp(*pv1, *pv3, t);
 
 	// Draw the triangles
-	DrawFlatTopTriangle(v1, vSplit, v2);
-	DrawFlatBottomTriangle(vSplit, v2, v3);
+	DrawFlatTopTriangle(*pv1, vSplit, *pv2);
+	DrawFlatBottomTriangle(vSplit, *pv2, *pv3);
 }
 
 template<class ShaderProgram>
@@ -289,58 +285,75 @@ inline void GraphicsPipeline<ShaderProgram>::NDCSpaceToScreenSpaceTriangle(VSOut
 }
 
 template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::DrawFlatTopTriangle(VSOut& v1, VSOut& v2, VSOut& v3)
+inline void GraphicsPipeline<ShaderProgram>::DrawFlatTopTriangle(const VSOut& v1, const VSOut& v2, const VSOut& v3)
 {
+	const VSOut* pv2 = &v2;
+	const VSOut* pv3 = &v3;
+	if (pv2->m_Position.x > pv3->m_Position.x)
+		std::swap(pv2, pv3);
+
 	DrawFlatTriangle
 	(
-		v1, v2, 
-		v1, v2.m_Position.x < v3.m_Position.x ? v2 : v3,
-		v1, v2.m_Position.x < v3.m_Position.x ? v3 : v2
+		v1, *pv2,
+		v1, *pv2,
+		v1, *pv3
 	);
 }
 
 template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::DrawFlatBottomTriangle(VSOut& v1, VSOut& v2, VSOut& v3)
+inline void GraphicsPipeline<ShaderProgram>::DrawFlatBottomTriangle(const VSOut& v1, const VSOut& v2, const VSOut& v3)
 {
+	const VSOut* pv1 = &v1;
+	const VSOut* pv2 = &v2;
+	if (pv1->m_Position.x > pv2->m_Position.x)
+		std::swap(pv1, pv2);
+
 	DrawFlatTriangle
 	(
-		v1, v3,
-		v1.m_Position.x < v2.m_Position.x ? v1 : v2, v3,
-		v1.m_Position.x < v2.m_Position.x ? v2 : v1, v3
+		*pv1, v3,
+		*pv1, v3,
+		*pv2, v3
 	);
 }
 
 template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::DrawFlatTriangle(VSOut& bottom, VSOut& top, VSOut& leftFrom, VSOut& leftTo, VSOut& rightFrom, VSOut& rightTo)
+inline void GraphicsPipeline<ShaderProgram>::DrawFlatTriangle(const VSOut& bottom, const VSOut& top, const VSOut& leftFrom, const VSOut& leftTo, const VSOut& rightFrom, const VSOut& rightTo)
 {
 	// Round because of point sampling (draw pixel if it's center is inside the triangle)
 	int startY = static_cast<int>(std::roundf(bottom.m_Position.y));
 	int endY = static_cast<int>(std::roundf(top.m_Position.y));
-	// Raster clipping
-	startY = std::clamp(startY, 0, Graphics::ScreenHeight);
-	endY = std::clamp(endY, 0, Graphics::ScreenHeight);
-
 	if (startY == endY) return;
 
 	const float deltaY = static_cast<float>(endY - startY);
 
 	for (int curY = startY; curY >= endY; curY--)
 	{
+		if (curY >= Graphics::ScreenHeight)
+		{
+			curY = Graphics::ScreenHeight;
+			continue;
+		}
+		if (curY < 0) break;
+
 		const float tY = (curY - startY) / deltaY;
 		VSOut left = VSOut::Lerp(leftFrom, leftTo, tY);
 		VSOut right = VSOut::Lerp(rightFrom, rightTo, tY);
 
 		int startX = static_cast<int>(std::roundf(left.m_Position.x));
 		int endX = static_cast<int>(std::roundf(right.m_Position.x));
-		startX = std::clamp(startX, 0, Graphics::ScreenWidth);
-		endX = std::clamp(endX, 0, Graphics::ScreenWidth);
-
 		if (startX == endX) continue;
 
 		const float deltaX = static_cast<float>(endX - startX);
 
 		for (int curX = startX; curX <= endX; curX++)
 		{
+			if (curX < 0)
+			{
+				curX = -1;
+				continue;
+			}
+			if (curX >= Graphics::ScreenWidth) break;
+
 			const float tX = (curX - startX) / deltaX;
 			VSOut fragment = VSOut::Lerp(left, right, tX);
 			fragment.m_Position.x = static_cast<float>(curX);

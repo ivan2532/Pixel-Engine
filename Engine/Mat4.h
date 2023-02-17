@@ -83,7 +83,8 @@ public:
 		{
 			lhs[0][0] * rhs.x + lhs[0][1] * rhs.y + lhs[0][2] * rhs.z + lhs[0][3] * rhs.w,
 			lhs[1][0] * rhs.x + lhs[1][1] * rhs.y + lhs[1][2] * rhs.z + lhs[1][3] * rhs.w,
-			lhs[2][0] * rhs.x + lhs[2][1] * rhs.y + lhs[2][2] * rhs.z + lhs[2][3] * rhs.w
+			lhs[2][0] * rhs.x + lhs[2][1] * rhs.y + lhs[2][2] * rhs.z + lhs[2][3] * rhs.w,
+			lhs[3][0] * rhs.x + lhs[3][1] * rhs.y + lhs[3][2] * rhs.z + lhs[3][3] * rhs.w
 		};
 	}
 
@@ -123,11 +124,11 @@ public:
 	{
 		return
 		{
-			(T)1.0, (T)0.0,             (T)0.0,              (T)0.0
-			(T)0.0, (T)std::cos(angle), -(T)std::sin(angle), (T)0.0
-			(T)0.0, (T)std::sin(angle), (T)std::cos(angle),  (T)0.0
+			(T)1.0, (T)0.0,             (T)0.0,              (T)0.0,
+			(T)0.0, (T)std::cos(angle), -(T)std::sin(angle), (T)0.0,
+			(T)0.0, (T)std::sin(angle), (T)std::cos(angle),  (T)0.0,
 			(T)0.0, (T)0.0,             (T)0.0,              (T)1.0
-		}
+		};
 	}
 	template <typename TAngle> static _Mat4 RotateY(TAngle angle)
 	{
@@ -137,7 +138,7 @@ public:
 			(T)0.0,              (T)1.0, (T)0.0,		     (T)0.0,
 			-(T)std::sin(angle), (T)0.0, (T)std::cos(angle), (T)0.0,
 			(T)0.0,              (T)0.0, (T)0.0,             (T)1.0
-		}
+		};
 	}
 	template <typename TAngle> static _Mat4 RotateZ(TAngle angle)
 	{
@@ -147,7 +148,7 @@ public:
 			(T)std::sin(angle), (T)std::cos(angle),  (T)0.0, (T)0.0,
 			(T)0.0,             (T)0.0,              (T)1.0, (T)0.0,
 			(T)0.0,             (T)0.0,              (T)0.0, (T)1.0
-		}
+		};
 	}
 
 	static _Mat4 Scale(T x, T y, T z)
@@ -183,15 +184,15 @@ public:
 	{
 		auto top    = std::tan(fov / (T)2.0) * nearPlane;
 		auto bottom = -top;
-		auto left   = bottom;
 		auto right  = top * aspectRatio;
+		auto left   = -right;
 
 		return
 		{
-			(T)2.0*nearPlane/(right-left), (T)0.0,                         -(right+left)/(right-left),                (T)0.0,
-			(T)0.0,                        (T)2.0*nearPlane /(top-bottom), -(top+bottom)/(top-bottom),                (T)0.0,
-			(T)0.0,                        (T)0.0,                         (farPlane+nearPlane)/(farPlane-nearPlane), -(T)2.0*farPlane*nearPlane/(farPlane-nearPlane),
-			(T)0.0,                        (T)0.0,                         (T)1.0,                                    (T)0.0
+			(T)2.0*nearPlane/(right-left), (T)0.0,                         (right+left)/(right-left),                (T)0.0,
+			(T)0.0,                        (T)2.0*nearPlane /(top-bottom), (top+bottom)/(top-bottom),                (T)0.0,
+			(T)0.0,                        (T)0.0,                         -(farPlane+nearPlane)/(farPlane-nearPlane), -(T)2.0*farPlane*nearPlane/(farPlane-nearPlane),
+			(T)0.0,                        (T)0.0,                         -(T)1.0,                                    (T)0.0
 		};
 	}
 };

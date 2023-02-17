@@ -43,13 +43,7 @@ public:
 	}
 	_Vec3& operator-=(const _Vec3& rhs) { return *this = *this - rhs; }
 
-	_Vec3& operator-()
-	{
-		x = -x;
-		y = -y;
-		z = -z;
-		return *this;
-	}
+	_Vec3 operator-() { return { -x, -y, -z }; }
 
 	friend _Vec3 operator*(T lhs, const _Vec3& rhs) { return _Vec3(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z); }
 	friend _Vec3 operator*(const _Vec3& lhs, T rhs) { return rhs * lhs; }
