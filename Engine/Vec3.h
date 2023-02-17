@@ -10,13 +10,13 @@ public:
 
 	_Vec3(T xx = (T)0.0, T yy = (T)0.0, T zz = (T)0.0)
 		:
-		_Vec2(xx, yy),
+		_Vec2<T>(xx, yy),
 		z(zz)
 	{
 	}
-	_Vec3(_Vec2 vec2)
+	_Vec3(_Vec2<T> vec2)
 		:
-		_Vec2(vec2.x, vec2.y),
+		_Vec2<T>(vec2.x, vec2.y),
 		z((T)0.0)
 	{
 	}

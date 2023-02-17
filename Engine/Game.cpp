@@ -28,14 +28,6 @@ Game::Game( MainWindow& wnd )
 	pipeline( gfx )
 {
 	pipeline.BindIndices({ 0, 1, 2 });
-	pipeline.BindVertices
-	(
-		{
-			Vec3{ -0.2f, -0.2f, 0.0f },
-			Vec3{ 0.2f, -0.2f, 0.0f },
-			Vec3{ 0.0f, 0.2f, 0.0f }
-		}
-	);
 }
 
 void Game::Go()
@@ -52,5 +44,28 @@ void Game::UpdateModel()
 
 void Game::ComposeFrame()
 {
-	pipeline.Draw();
+	if (wnd.kbd.KeyIsPressed('C'))
+	{
+		pipeline.BindVertices
+		(
+			{
+				{ Vec3{ 0.2f, -0.2f, -2.0f }, Vec3{ 0.0f, 1.0f, 0.0f } },
+				{ Vec3{ 0.0f, 0.2f, 0.0f }, Vec3{ 0.0f, 0.0f, 1.0f } },
+				{ Vec3{ -0.2f, -0.2f, 0.0f }, Vec3{ 1.0f, 0.0f, 0.0f } }
+			}
+		);
+		pipeline.Draw();
+	}
+	else
+	{
+		pipeline.BindVertices
+		(
+			{
+				{ Vec3{ 0.2f, -0.2f, 0.0f }, Vec3{ 0.0f, 1.0f, 0.0f } },
+				{ Vec3{ 0.0f, 0.2f, 0.0f }, Vec3{ 0.0f, 0.0f, 1.0f } },
+				{ Vec3{ -0.2f, -0.2f, 0.0f }, Vec3{ 1.0f, 0.0f, 0.0f } }
+			}
+		);
+		pipeline.Draw();
+	}
 }

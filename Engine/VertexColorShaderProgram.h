@@ -3,16 +3,18 @@
 #include "Vec3.h"
 #include "Colors.h"
 
-class DefaultShaderProgram
+class VertexColorShaderProgram
 {
 public:
 	struct VSIn
 	{
 		Vec3 m_Position;
+		Vec3 m_Color;
 
-		VSIn(Vec3 position)
+		VSIn(Vec3 position, Vec3 color)
 			:
-			m_Position(position)
+			m_Position(position),
+			m_Color(color)
 		{
 		}
 	};
@@ -20,12 +22,12 @@ public:
 	struct VSOut
 	{
 		Vec3 m_Position;
-		float m_Test;
+		Vec3 m_Color;
 
-		VSOut(Vec3 position, float test)
+		VSOut(Vec3 position, Vec3 color)
 			:
 			m_Position(position),
-			m_Test(test)
+			m_Color(color)
 		{
 		}
 
@@ -34,7 +36,7 @@ public:
 			return
 			{
 				lhs.m_Position + rhs.m_Position,
-				lhs.m_Test + rhs.m_Test
+				lhs.m_Color + rhs.m_Color
 			};
 		}
 		VSOut& operator+=(const VSOut& rhs) { return *this = *this + rhs; }
@@ -44,7 +46,7 @@ public:
 			return
 			{
 				lhs.m_Position - rhs.m_Position,
-				lhs.m_Test - rhs.m_Test
+				lhs.m_Color - rhs.m_Color
 			};
 		}
 		VSOut& operator-=(const VSOut& rhs) { return *this = *this - rhs; }
@@ -54,7 +56,7 @@ public:
 			return
 			{
 				lhs.m_Position * rhs,
-				lhs.m_Test * rhs
+				lhs.m_Color * rhs
 			};
 		}
 		friend VSOut operator*(float lhs, const VSOut& rhs) { return rhs * lhs; }
@@ -68,7 +70,7 @@ public:
 	public:
 		VSOut Main(const VSIn& vIn)
 		{
-			return VSOut(vIn.m_Position, vIn.m_Position.x);
+			return VSOut(vIn.m_Position, vIn.m_Color);
 		}
 	};
 
@@ -92,7 +94,12 @@ public:
 					static_cast<int>(fragment.m_Position.y)
 				},
 				0.0f,
-				Colors::Yellow
+				Color
+				(
+					static_cast<unsigned char>(fragment.m_Color.x * 255),
+					static_cast<unsigned char>(fragment.m_Color.y * 255),
+					static_cast<unsigned char>(fragment.m_Color.z * 255)
+				)
 			};
 		}
 	};

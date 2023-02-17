@@ -24,7 +24,7 @@
 #include "Mouse.h"
 #include "Graphics.h"
 #include "GraphicsPipeline.h"
-#include "DefaultShaderProgram.h"
+#include "VertexColorShaderProgram.h"
 
 class Game
 {
@@ -42,7 +42,7 @@ private:
 private:
 	MainWindow& wnd;
 	Graphics gfx;
-	GraphicsPipeline<DefaultShaderProgram> pipeline;
+	GraphicsPipeline<VertexColorShaderProgram> pipeline;
 	/********************************/
 	/*  User Variables              */
 	/********************************/
