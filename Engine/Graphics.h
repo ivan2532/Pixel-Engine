@@ -75,4 +75,5 @@ private:
 public:
 	static constexpr int ScreenWidth = 1280;
 	static constexpr int ScreenHeight = 960;
+	static constexpr float AspectRatio = static_cast<float>(Graphics::ScreenWidth) / Graphics::ScreenHeight;
 };

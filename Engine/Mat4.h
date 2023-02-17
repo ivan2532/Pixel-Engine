@@ -2,7 +2,7 @@
 
 #include <cmath>
 
-#include "Vec3.h"
+#include "Vec4.h"
 
 template <typename T>
 class _Mat4
@@ -10,7 +10,8 @@ class _Mat4
 public:
 	T matrix[4][4] = {};
 
-	T* operator[](unsigned i) { return matrix[i]; }
+	T* operator[](int i) { return matrix[i]; }
+	const T* operator[](int i) const { return matrix[i]; }
 
 	friend _Mat4 operator+(const _Mat4& lhs, const _Mat4& rhs)
 	{
@@ -68,7 +69,7 @@ public:
 		{
 			for (auto j = 0; j < 4; j++)
 			{
-				result[i][j] = lhs[i][0] * rhs[0][i] + lhs[i][1] * rhs[1][i] + lhs[i][2] * rhs[2][i] + lhs[i][3] * rhs[3][i];
+				result[i][j] = lhs[i][0] * rhs[0][j] + lhs[i][1] * rhs[1][j] + lhs[i][2] * rhs[2][j] + lhs[i][3] * rhs[3][j];
 			}
 		}
 
@@ -80,10 +81,10 @@ public:
 	{
 		return
 		{
-			lhs[0][0] * rhs[0] + lhs[0][1] * rhs[1] + lhs[0][2] * rhs[2] + lhs[0][3] * rhs[3],
-			lhs[1][0] * rhs[0] + lhs[1][1] * rhs[1] + lhs[1][2] * rhs[2] + lhs[1][3] * rhs[3],
-			lhs[2][0] * rhs[0] + lhs[2][1] * rhs[1] + lhs[2][2] * rhs[2] + lhs[2][3] * rhs[3]
-		}
+			lhs[0][0] * rhs.x + lhs[0][1] * rhs.y + lhs[0][2] * rhs.z + lhs[0][3] * rhs.w,
+			lhs[1][0] * rhs.x + lhs[1][1] * rhs.y + lhs[1][2] * rhs.z + lhs[1][3] * rhs.w,
+			lhs[2][0] * rhs.x + lhs[2][1] * rhs.y + lhs[2][2] * rhs.z + lhs[2][3] * rhs.w
+		};
 	}
 
 	static constexpr _Mat4 Identity()
@@ -94,22 +95,28 @@ public:
 			(T)0.0, (T)1.0, (T)0.0, (T)0.0,
 			(T)0.0, (T)0.0, (T)1.0, (T)0.0,
 			(T)0.0, (T)0.0, (T)0.0, (T)1.0
-		}
+		};
 	}
 
 	static _Mat4 Translate(T x, T y, T z)
 	{
-		(T)1.0, (T)0.0, (T)0.0, x,
-		(T)0.0, (T)1.0, (T)0.0, y,
-		(T)0.0, (T)0.0, (T)1.0, z,
-		(T)0.0, (T)0.0, (T)0.0, (T)1.0
+		return
+		{
+			(T)1.0, (T)0.0, (T)0.0, x,
+			(T)0.0, (T)1.0, (T)0.0, y,
+			(T)0.0, (T)0.0, (T)1.0, z,
+			(T)0.0, (T)0.0, (T)0.0, (T)1.0
+		};
 	}
 	static _Mat4 Translate(const _Vec3<T>& t)
 	{
-		(T)1.0, (T)0.0, (T)0.0, t.x,
-		(T)0.0, (T)1.0, (T)0.0, t.y,
-		(T)0.0, (T)0.0, (T)1.0, t.z,
-		(T)0.0, (T)0.0, (T)0.0, (T)1.0
+		return
+		{
+			(T)1.0, (T)0.0, (T)0.0, t.x,
+			(T)0.0, (T)1.0, (T)0.0, t.y,
+			(T)0.0, (T)0.0, (T)1.0, t.z,
+			(T)0.0, (T)0.0, (T)0.0, (T)1.0
+		};
 	}
 
 	template <typename TAngle> static _Mat4 RotateX(TAngle angle)
@@ -155,7 +162,7 @@ public:
 	}
 	static _Mat4 Scale(const _Vec3<T>& s) { return Scale(s.x, s.y, s.z); }
 
-	static _Mat4 OrthographicProjection(T near, T far, T orthographicSize, T aspectRatio)
+	static _Mat4 OrthographicProjection(T nearPlane, T farPlane, T orthographicSize, T aspectRatio)
 	{
 		auto height = std::sqrt(orthographicSize / ((T)1.0 + aspectRatio));
 
@@ -166,26 +173,26 @@ public:
 
 		return
 		{
-			(T)2.0/(right-left), (T)0.0,              (T)0.0,            -(right+left)/(right-left),
-			(T)0.0,              (T)2.0/(top-bottom), (T)0.0,            -(top+bottom)/(top-bottom),
-			(T)0.0,              (T)0.0,              (T)2.0/(far-near), -(far+near)/(far-near),
-			(T)0.0,              (T)0.0,              (T)0.0,            (T)1.0
-		}
+			(T)2.0/(right-left), (T)0.0,              (T)0.0,                      -(right+left)/(right-left),
+			(T)0.0,              (T)2.0/(top-bottom), (T)0.0,                      -(top+bottom)/(top-bottom),
+			(T)0.0,              (T)0.0,              (T)2.0/(farPlane-nearPlane), -(farPlane+nearPlane)/(farPlane-nearPlane),
+			(T)0.0,              (T)0.0,              (T)0.0,                      (T)1.0
+		};
 	}
-	template <typename TAngle> static _Mat4 PerspectiveProjection(T near, T far, TAngle fov, T aspectRatio)
+	template <typename TAngle> static _Mat4 PerspectiveProjection(T nearPlane, T farPlane, TAngle fov, T aspectRatio)
 	{
-		auto top    = std::tan(fov / (T)2.0) * near;
+		auto top    = std::tan(fov / (T)2.0) * nearPlane;
 		auto bottom = -top;
 		auto left   = bottom;
 		auto right  = top * aspectRatio;
 
 		return
 		{
-			(T)2.0*near/(right-left), (T)0.0,                   -(right+left)/(right-left), (T)0.0,
-			(T)0.0,                   (T)2.0*near/(top-bottom), -(top+bottom)/(top-bottom), (T)0.0,
-			(T)0.0,                   (T)0.0,                   (far+near)/(far-near),      -(T)2.0*far*near/(far-near),
-			(T)0.0,                   (T)0.0,                   (T)1.0,                     (T)0.0
-		}
+			(T)2.0*nearPlane/(right-left), (T)0.0,                         -(right+left)/(right-left),                (T)0.0,
+			(T)0.0,                        (T)2.0*nearPlane /(top-bottom), -(top+bottom)/(top-bottom),                (T)0.0,
+			(T)0.0,                        (T)0.0,                         (farPlane+nearPlane)/(farPlane-nearPlane), -(T)2.0*farPlane*nearPlane/(farPlane-nearPlane),
+			(T)0.0,                        (T)0.0,                         (T)1.0,                                    (T)0.0
+		};
 	}
 };
 

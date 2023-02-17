@@ -3,7 +3,7 @@
 #include "Vec3.h"
 
 template <typename T>
-class _Vec4 : _Vec3<T>
+class _Vec4 : public _Vec3<T>
 {
 public:
 	T w;
@@ -71,6 +71,14 @@ public:
 		*this = *this * rhs;
 		this->w = originalW;
 
+		return *this;
+	}
+
+	_Vec4& operator-()
+	{
+		x = -x;
+		y = -y;
+		z = -z;
 		return *this;
 	}
 

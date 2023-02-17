@@ -18,6 +18,9 @@ class GraphicsPipeline
 public:
 	GraphicsPipeline(Graphics& graphics);
 
+	VertexShader& GetVertexShader() { return m_VertexShader; }
+	PixelShader& GetPixelShader() { return m_PixelShader; }
+
 	void BindIndices(const std::vector<size_t>& value);
 	void BindVertices(const std::vector<VSIn>& value);
 	void Draw();
@@ -47,7 +50,11 @@ private:
 
 	#pragma region Helper functions
 
-	void ClipSpaceToScreenSpace(VSOut& v);
+	void ClipSpaceToNDCSpaceVertex(VSOut& v);
+	void ClipSpaceToNDCSpaceTriangle(VSOut& v1, VSOut& v2, VSOut& v3);
+	void NDCSpaceToScreenSpaceVertex(VSOut& v);
+	void NDCSpaceToScreenSpaceTriangle(VSOut& v1, VSOut& v2, VSOut& v3);
+
 	void DrawFlatTopTriangle(VSOut& v1, VSOut& v2, VSOut& v3);
 	void DrawFlatBottomTriangle(VSOut& v1, VSOut& v2, VSOut& v3);
 	void DrawFlatTriangle(VSOut& bottom, VSOut& top, VSOut& leftFrom, VSOut& leftTo, VSOut& rightFrom, VSOut& rightTo);
@@ -108,99 +115,99 @@ inline void GraphicsPipeline<ShaderProgram>::TriangleAssembly()
 template<class ShaderProgram>
 inline void GraphicsPipeline<ShaderProgram>::Clipping(VSOut v1, VSOut v2, VSOut v3)
 {
-	/*
-	 Geometric clipping against the near plane, for left and right planes we'll
-	 use raster clipping, and we'll ignore far plane clipping.
-	 Here we will have vertex positions in range from (-1, -1, -1) to (1, 1, 1).
-	*/
+	// Here we will have vertex positions in clip space, before the perspective division.
 
-	constexpr float nearPlane = -1.0f;
+	// Clip triangles completley out of the view volume
+	
+	// Left and right plane
+	if (v1.m_Position.x <= -v1.m_Position.w && v2.m_Position.x <= -v2.m_Position.w && v3.m_Position.x <= -v3.m_Position.w) return;
+	if (v1.m_Position.x >= v1.m_Position.w && v2.m_Position.x >= v2.m_Position.w && v3.m_Position.x >= v3.m_Position.w) return;
 
-	if (v1.m_Position.z < nearPlane && v2.m_Position.z < nearPlane && v3.m_Position.z < nearPlane) return;
+	// Bottom and top plane
+	if (v1.m_Position.y <= -v1.m_Position.w && v2.m_Position.y <= -v2.m_Position.w && v3.m_Position.y <= -v3.m_Position.w) return;
+	if (v1.m_Position.y >= v1.m_Position.w && v2.m_Position.y >= v2.m_Position.w && v3.m_Position.y >= v3.m_Position.w) return;
+
+	// Near and far plane
+	if (v1.m_Position.z <= -v1.m_Position.w && v2.m_Position.z <= -v2.m_Position.w && v3.m_Position.z <= -v3.m_Position.w) return;
+	if (v1.m_Position.z >= v1.m_Position.w && v2.m_Position.z >= v2.m_Position.w && v3.m_Position.z >= v3.m_Position.w) return;
 	
 	// Sort vertices by x (descending)
 	if (v1.m_Position.x < v2.m_Position.x) std::swap(v1, v2);
 	if (v2.m_Position.x < v3.m_Position.x) std::swap(v2, v3);
 	if (v1.m_Position.x < v2.m_Position.x) std::swap(v1, v2);
 
+	constexpr float nearPlaneNDC = -1.0f;
+
 	// First scenario: two vertices are behind the nearPlane plane
-	if (v1.m_Position.z < nearPlane && v2.m_Position.z < nearPlane)
+	auto TwoVerticesOutClipping = [this, nearPlaneNDC](VSOut& vOut1, VSOut& vOut2, VSOut& vIn)
 	{
-		const float t1 = (nearPlane - v1.m_Position.z) / (v3.m_Position.z - v1.m_Position.z);
-		const float t2 = (nearPlane - v2.m_Position.z) / (v3.m_Position.z - v2.m_Position.z);
-		v1 = VSOut::Lerp(v1, v3, t1);
-		v2 = VSOut::Lerp(v2, v3, t2);
+		// First transform our vertices to NDC space, so we can clip
+		ClipSpaceToNDCSpaceTriangle(vOut1, vOut2, vIn);
 
-		ScreenMapping(v1, v2, v3);
+		const float t1 = (nearPlaneNDC - vOut1.m_Position.z) / (vIn.m_Position.z - vOut1.m_Position.z);
+		const float t2 = (nearPlaneNDC - vOut2.m_Position.z) / (vIn.m_Position.z - vOut2.m_Position.z);
+		vOut1 = VSOut::Lerp(vOut1, vIn, t1);
+		vOut2 = VSOut::Lerp(vOut2, vIn, t2);
+
+		ScreenMapping(vOut1, vOut2, vIn);
+	};
+
+	if (v1.m_Position.z <= -v1.m_Position.w && v2.m_Position.z <= -v2.m_Position.w)
+	{
+		TwoVerticesOutClipping(v1, v2, v3);
 		return;
 	}
-	else if (v2.m_Position.z < nearPlane && v3.m_Position.z < nearPlane)
+	else if (v2.m_Position.z <= -v2.m_Position.w && v3.m_Position.z <= -v3.m_Position.w)
 	{
-		const float t2 = (nearPlane - v2.m_Position.z) / (v1.m_Position.z - v2.m_Position.z);
-		const float t3 = (nearPlane - v3.m_Position.z) / (v1.m_Position.z - v3.m_Position.z);
-		v2 = VSOut::Lerp(v2, v1, t2);
-		v3 = VSOut::Lerp(v3, v1, t3);
-
-		ScreenMapping(v1, v2, v3);
+		TwoVerticesOutClipping(v2, v3, v1);
 		return;
 	}
-	else if (v1.m_Position.z < nearPlane && v3.m_Position.z < nearPlane)
+	else if (v1.m_Position.z <= -v1.m_Position.w && v3.m_Position.z <= -v3.m_Position.w)
 	{
-		const float t1 = (nearPlane - v1.m_Position.z) / (v2.m_Position.z - v1.m_Position.z);
-		const float t3 = (nearPlane - v3.m_Position.z) / (v2.m_Position.z - v3.m_Position.z);
-		v1 = VSOut::Lerp(v1, v2, t1);
-		v3 = VSOut::Lerp(v3, v2, t3);
-
-		ScreenMapping(v1, v2, v3);
+		TwoVerticesOutClipping(v1, v3, v2);
 		return;
 	}
 
 	// Second scenario: one vertex is behind the nearPlane plane
-	// Here we can mess up the order of vertices (bottom to top)
-	if (v1.m_Position.z < nearPlane)
+	auto OneVertexOutClipping = [this, nearPlaneNDC](VSOut& vOut, VSOut& vIn1, VSOut& vIn2)
 	{
-		const float tBottom = (nearPlane - v1.m_Position.z) / (v2.m_Position.z - v1.m_Position.z);
-		const float tTop = (nearPlane - v1.m_Position.z) / (v3.m_Position.z - v1.m_Position.z);
-		VSOut vBottomIntersect = VSOut::Lerp(v1, v2, tBottom);
-		VSOut vTopIntersect = VSOut::Lerp(v1, v3, tTop);
+		// First transform our vertices to NDC space, so we can clip
+		ClipSpaceToNDCSpaceTriangle(vOut, vIn1, vIn2);
 
-		ScreenMapping(vBottomIntersect, vTopIntersect, v3);
-		ScreenMapping(vBottomIntersect, v2, v3);
+		const float tBottom = (nearPlaneNDC - vOut.m_Position.z) / (vIn1.m_Position.z - vOut.m_Position.z);
+		const float tTop = (nearPlaneNDC - vOut.m_Position.z) / (vIn2.m_Position.z - vOut.m_Position.z);
+		VSOut vBottomIntersect = VSOut::Lerp(vOut, vIn1, tBottom);
+		VSOut vTopIntersect = VSOut::Lerp(vOut, vIn2, tTop);
+
+		ScreenMapping(vBottomIntersect, vTopIntersect, vIn2);
+		ScreenMapping(vBottomIntersect, vIn1, vIn2);
+	};
+
+	if (v1.m_Position.z <= -v1.m_Position.w)
+	{
+		OneVertexOutClipping(v1, v2, v3);
 		return;
 	}
-	else if (v2.m_Position.z < nearPlane)
+	else if (v2.m_Position.z <= -v2.m_Position.w)
 	{
-		const float tBottom = (nearPlane - v2.m_Position.z) / (v1.m_Position.z - v2.m_Position.z);
-		const float tTop = (nearPlane - v2.m_Position.z) / (v3.m_Position.z - v2.m_Position.z);
-		VSOut vBottomIntersect = VSOut::Lerp(v2, v1, tBottom);
-		VSOut vTopIntersect = VSOut::Lerp(v2, v3, tTop);
-
-		ScreenMapping(vBottomIntersect, vTopIntersect, v3);
-		ScreenMapping(v1, vBottomIntersect, v3);
+		OneVertexOutClipping(v2, v1, v3);
 		return;
 	}
-	else if (v3.m_Position.z < nearPlane)
+	else if (v3.m_Position.z <= -v3.m_Position.w)
 	{
-		const float tBottom = (nearPlane - v3.m_Position.z) / (v1.m_Position.z - v3.m_Position.z);
-		const float tTop = (nearPlane - v3.m_Position.z) / (v2.m_Position.z - v3.m_Position.z);
-		VSOut vBottomIntersect = VSOut::Lerp(v3, v1, tBottom);
-		VSOut vTopIntersect = VSOut::Lerp(v3, v2, tTop);
-
-		ScreenMapping(vBottomIntersect, v2, vTopIntersect);
-		ScreenMapping(v1, vBottomIntersect, v2);
+		OneVertexOutClipping(v3, v1, v2);
 		return;
 	}
 
 	// Third scenario: no vertex is behind the nearPlane plane
+	ClipSpaceToNDCSpaceTriangle(v1, v2, v3);
 	ScreenMapping(v1, v2, v3);
 }
 
 template<class ShaderProgram>
 inline void GraphicsPipeline<ShaderProgram>::ScreenMapping(VSOut v1, VSOut v2, VSOut v3)
 {
-	ClipSpaceToScreenSpace(v1);
-	ClipSpaceToScreenSpace(v2);
-	ClipSpaceToScreenSpace(v3);
+	NDCSpaceToScreenSpaceTriangle(v1, v2, v3);
 	Rasterization(v1, v2, v3);
 }
 
@@ -250,10 +257,35 @@ inline void GraphicsPipeline<ShaderProgram>::Merging(PSOut p)
 }
 
 template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::ClipSpaceToScreenSpace(VSOut& v)
+inline void GraphicsPipeline<ShaderProgram>::ClipSpaceToNDCSpaceVertex(VSOut& v)
+{
+	v.m_Position.x /= v.m_Position.w;
+	v.m_Position.y /= v.m_Position.w;
+	v.m_Position.z /= v.m_Position.w;
+	v.m_Position.w = 1.0f;
+}
+
+template<class ShaderProgram>
+inline void GraphicsPipeline<ShaderProgram>::ClipSpaceToNDCSpaceTriangle(VSOut& v1, VSOut& v2, VSOut& v3)
+{
+	ClipSpaceToNDCSpaceVertex(v1);
+	ClipSpaceToNDCSpaceVertex(v2);
+	ClipSpaceToNDCSpaceVertex(v3);
+}
+
+template<class ShaderProgram>
+inline void GraphicsPipeline<ShaderProgram>::NDCSpaceToScreenSpaceVertex(VSOut& v)
 {
 	v.m_Position.x = Graphics::ScreenWidth / 2.0f * (1 + v.m_Position.x);
 	v.m_Position.y = Graphics::ScreenHeight / 2.0f * (1 - v.m_Position.y);
+}
+
+template<class ShaderProgram>
+inline void GraphicsPipeline<ShaderProgram>::NDCSpaceToScreenSpaceTriangle(VSOut& v1, VSOut& v2, VSOut& v3)
+{
+	NDCSpaceToScreenSpaceVertex(v1);
+	NDCSpaceToScreenSpaceVertex(v2);
+	NDCSpaceToScreenSpaceVertex(v3);
 }
 
 template<class ShaderProgram>

@@ -10,7 +10,8 @@ class _Mat3
 public:
 	T matrix[3][3] = {};
 
-	T* operator[](unsigned i) { return matrix[i]; }
+	T* operator[](int i) { return matrix[i]; }
+	const T* operator[](int i) const { return matrix[i]; }
 
 	friend _Mat3 operator+(const _Mat3& lhs, const _Mat3& rhs)
 	{
@@ -68,7 +69,7 @@ public:
 		{
 			for (auto j = 0; j < 3; j++)
 			{
-				result[i][j] = lhs[i][0] * rhs[0][i] + lhs[i][1] * rhs[1][i] + lhs[i][2] * rhs[2][i];
+				result[i][j] = lhs[i][0] * rhs[0][j] + lhs[i][1] * rhs[1][j] + lhs[i][2] * rhs[2][j];
 			}
 		}
 
