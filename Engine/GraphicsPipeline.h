@@ -3,6 +3,7 @@
 #include <cassert>
 #include <memory>
 #include <cmath>
+#include <limits>
 
 #include "Graphics.h"
 
@@ -17,6 +18,7 @@ class GraphicsPipeline
 
 public:
 	GraphicsPipeline(Graphics& graphics);
+	~GraphicsPipeline();
 
 	VertexShader& GetVertexShader() { return m_VertexShader; }
 	PixelShader& GetPixelShader() { return m_PixelShader; }
@@ -24,6 +26,7 @@ public:
 	void BindIndices(const std::vector<size_t>& value);
 	void BindVertices(const std::vector<VSIn>& value);
 	void Draw();
+	void ClearZBuffer();
 
 private:
 	Graphics& m_Graphics;
@@ -36,6 +39,9 @@ private:
 
 	std::vector<VSOut> m_TransformedVertices;
 
+	float** zBuffer;
+	const bool earlyZ = true;
+
 	#pragma region Pipeline stages
 
 	void VertexProcessing();
@@ -43,8 +49,9 @@ private:
 	void Clipping(VSOut& v1, VSOut& v2, VSOut& v3);
 	void ScreenMapping(VSOut v1, VSOut v2, VSOut v3);
 	void Rasterization(const VSOut& v1, const VSOut& v2, const VSOut& v3);
-	void PixelProcessing(VSOut fragment);
+	void PixelProcessing(const VSOut& fragment);
 	void Merging(PSOut p);
+	void MergingWithDepthCheck(PSOut p);
 
 	#pragma endregion
 
@@ -69,6 +76,22 @@ inline GraphicsPipeline<ShaderProgram>::GraphicsPipeline(Graphics& graphics)
 	:
 	m_Graphics(graphics)
 {
+	zBuffer = new float*[Graphics::ScreenHeight];
+	for (int i = 0; i < Graphics::ScreenHeight; i++)
+	{
+		zBuffer[i] = new float[Graphics::ScreenWidth];
+	}
+}
+
+template<class ShaderProgram>
+inline GraphicsPipeline<ShaderProgram>::~GraphicsPipeline()
+{
+	for (int i = 0; i < Graphics::ScreenHeight; i++)
+	{
+		delete[] zBuffer[i];
+	}
+
+	delete[] zBuffer;
 }
 
 template<class ShaderProgram>
@@ -241,15 +264,44 @@ inline void GraphicsPipeline<ShaderProgram>::Rasterization(const VSOut& v1, cons
 }
 
 template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::PixelProcessing(VSOut fragment)
+inline void GraphicsPipeline<ShaderProgram>::PixelProcessing(const VSOut& fragment)
 {
-	Merging(m_PixelShader.Main(fragment));
+	if (earlyZ)
+	{
+		Vei2 screenPosition
+		(
+			static_cast<int>(fragment.m_Position.x),
+			static_cast<int>(fragment.m_Position.y)
+		);
+
+		if (fragment.m_Position.z < zBuffer[screenPosition.y][screenPosition.x])
+		{
+			zBuffer[screenPosition.y][screenPosition.x] = fragment.m_Position.z;
+			Merging(m_PixelShader.Main(fragment));
+		}
+	}
+	else
+	{
+		MergingWithDepthCheck(m_PixelShader.Main(fragment));
+	}
 }
 
 template<class ShaderProgram>
 inline void GraphicsPipeline<ShaderProgram>::Merging(PSOut p)
 {
 	m_Graphics.PutPixel(p.m_Position.x, p.m_Position.y, p.m_Color);
+}
+
+template<class ShaderProgram>
+inline void GraphicsPipeline<ShaderProgram>::MergingWithDepthCheck(PSOut p)
+{
+	Vei2 screenPosition(p.m_Position.x, p.m_Position.y);
+
+	if (p.z < zBuffer[screenPosition.y][screenPosition.x])
+	{
+		zBuffer[screenPosition.y][screenPosition.x] = p.z;
+		m_Graphics.PutPixel(screenPosition.x, screenPosition.y, p.m_Color);
+	}
 }
 
 template<class ShaderProgram>
@@ -282,6 +334,18 @@ inline void GraphicsPipeline<ShaderProgram>::NDCSpaceToScreenSpaceTriangle(VSOut
 	NDCSpaceToScreenSpaceVertex(v1);
 	NDCSpaceToScreenSpaceVertex(v2);
 	NDCSpaceToScreenSpaceVertex(v3);
+}
+
+template<class ShaderProgram>
+inline void GraphicsPipeline<ShaderProgram>::ClearZBuffer()
+{
+	for (int i = 0; i < Graphics::ScreenHeight; i++)
+	{
+		for (int j = 0; j < Graphics::ScreenWidth; j++)
+		{
+			zBuffer[i][j] = std::numeric_limits<float>::max();
+		}
+	}
 }
 
 template<class ShaderProgram>

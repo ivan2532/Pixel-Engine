@@ -100,7 +100,7 @@ public:
 					static_cast<int>(fragment.m_Position.x),
 					static_cast<int>(fragment.m_Position.y)
 				},
-				0.0f,
+				fragment.m_Position.z,
 				Color
 				(
 					static_cast<unsigned char>(fragment.m_Color.x * 255),
