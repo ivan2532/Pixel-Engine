@@ -41,7 +41,7 @@ private:
 	void VertexProcessing();
 	void TriangleAssembly();
 	void Clipping(VSOut& v1, VSOut& v2, VSOut& v3);
-	void ScreenMapping(VSOut& v1, VSOut& v2, VSOut& v3);
+	void ScreenMapping(VSOut v1, VSOut v2, VSOut v3);
 	void Rasterization(const VSOut& v1, const VSOut& v2, const VSOut& v3);
 	void PixelProcessing(VSOut fragment);
 	void Merging(PSOut p);
@@ -202,7 +202,7 @@ inline void GraphicsPipeline<ShaderProgram>::Clipping(VSOut& v1, VSOut& v2, VSOu
 }
 
 template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::ScreenMapping(VSOut& v1, VSOut& v2, VSOut& v3)
+inline void GraphicsPipeline<ShaderProgram>::ScreenMapping(VSOut v1, VSOut v2, VSOut v3)
 {
 	NDCSpaceToScreenSpaceTriangle(v1, v2, v3);
 	Rasterization(v1, v2, v3);
