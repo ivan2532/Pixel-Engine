@@ -40,6 +40,19 @@ public:
 	friend _Vec2 operator*(const _Vec2& lhs, T rhs) { return rhs * lhs; }
 	_Vec2& operator*=(T rhs) { return *this = *this * rhs; }
 
+	friend _Vec2 operator/(const _Vec2& lhs, T rhs) { return lhs * ((T)1.0 / rhs); }
+	_Vec2& operator/=(T rhs) { return *this = *this * ((T)1.0 / rhs); }
+
+	static auto Magnitude(const _Vec2& value)
+	{
+		return static_cast<T>(std::sqrt(value.x * value.x + value.y * value.y));
+	}
+	static _Vec2 Normalize(const _Vec2& value)
+	{
+		float magnitude = _Vec2::Magnitude(value);
+		return value / magnitude;
+	}
+
 	static auto Dot(const _Vec2& lhs, const _Vec2& rhs) { return lhs.x * rhs.x + lhs.y * rhs.y; }
 	static _Vec2 Hadamard(const _Vec2& lhs, const _Vec2& rhs) { return _Vec2(lhs.x * rhs.x, lhs.y * rhs.y); }
 

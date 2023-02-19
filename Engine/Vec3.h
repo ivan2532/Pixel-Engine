@@ -49,6 +49,19 @@ public:
 	friend _Vec3 operator*(const _Vec3& lhs, T rhs) { return rhs * lhs; }
 	_Vec3& operator*=(T rhs) { return *this = *this * rhs; }
 
+	friend _Vec3 operator/(const _Vec3& lhs, T rhs) { return lhs * ((T)1.0 / rhs); }
+	_Vec3& operator/=(T rhs) { return *this = *this * ((T)1.0 / rhs); }
+
+	static auto Magnitude(const _Vec3& value)
+	{
+		return static_cast<T>(std::sqrt(value.x * value.x + value.y * value.y + value.z * value.z));
+	}
+	static _Vec3 Normalize(const _Vec3& value)
+	{
+		float magnitude = _Vec3::Magnitude(value);
+		return value / magnitude;
+	}
+
 	static auto Dot(const _Vec3& lhs, const _Vec3& rhs)
 	{
 		return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
@@ -75,7 +88,7 @@ public:
 	static constexpr _Vec3 Left()  { return _Vec2<T>::Left(); }
 	static constexpr _Vec3 Right() { return _Vec2<T>::Right(); }
 	static constexpr _Vec3 Zero()  { return _Vec2<T>::Zero(); }
-	static constexpr _Vec3 One()   { return _Vec2<T>::One(); }
+	static constexpr _Vec3 One()   { return { 1.0f, 1.0f, 1.0f }; }
 };
 
 using Vec3 = _Vec3<float>;

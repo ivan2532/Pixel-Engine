@@ -4,18 +4,18 @@
 #include "Mat4.h"
 #include "Colors.h"
 
-class VertexColorShaderProgram
+class DirectionalLightningShaderProgram
 {
 public:
 	struct VSIn
 	{
 		Vec3 m_Position;
-		Vec3 m_Color;
+		Vec3 m_Normal;
 
-		VSIn(Vec3 position, Vec3 color)
+		VSIn(Vec3 position, Vec3 normal)
 			:
 			m_Position(position),
-			m_Color(color)
+			m_Normal(normal)
 		{
 		}
 	};
@@ -23,12 +23,14 @@ public:
 	struct VSOut
 	{
 		Vec4 m_Position;
-		Vec3 m_Color;
+		Vec3 m_WorldPosition;
+		Vec3 m_Normal;
 
-		VSOut(Vec4 position, Vec3 color)
+		VSOut(Vec4 position, Vec3 worldPosition, Vec3 normal)
 			:
 			m_Position(position),
-			m_Color(color)
+			m_WorldPosition(worldPosition),
+			m_Normal(normal)
 		{
 		}
 
@@ -37,7 +39,8 @@ public:
 			return
 			{
 				lhs.m_Position + rhs.m_Position,
-				lhs.m_Color + rhs.m_Color
+				lhs.m_WorldPosition + rhs.m_WorldPosition,
+				lhs.m_Normal + rhs.m_Normal
 			};
 		}
 		VSOut& operator+=(const VSOut& rhs) { return *this = *this + rhs; }
@@ -47,7 +50,8 @@ public:
 			return
 			{
 				lhs.m_Position - rhs.m_Position,
-				lhs.m_Color - rhs.m_Color
+				lhs.m_WorldPosition + rhs.m_WorldPosition,
+				lhs.m_Normal - rhs.m_Normal
 			};
 		}
 		VSOut& operator-=(const VSOut& rhs) { return *this = *this - rhs; }
@@ -57,7 +61,8 @@ public:
 			return
 			{
 				lhs.m_Position * rhs,
-				lhs.m_Color * rhs
+				lhs.m_WorldPosition + rhs,
+				lhs.m_Normal * rhs
 			};
 		}
 		friend VSOut operator*(float lhs, const VSOut& rhs) { return rhs * lhs; }
@@ -71,10 +76,16 @@ public:
 	public:
 		VSOut Main(const VSIn& vIn)
 		{
+			Mat4 normalTransform = m_MV;
+			normalTransform[0][3] = 0.0f;
+			normalTransform[1][3] = 0.0f;
+			normalTransform[2][3] = 0.0f;
+
 			return VSOut
 			(
 				m_MVP * vIn.m_Position,
-				vIn.m_Color
+				m_MV * vIn.m_Position,
+				Vec3::Normalize(normalTransform * vIn.m_Normal)
 			);
 		}
 
@@ -99,6 +110,14 @@ public:
 	public:
 		PSOut Main(const VSOut& fragment)
 		{
+			//Vec3 lightDirection = Vec3::Normalize((static_cast<Vec3>(fragment.m_WorldPosition) - Vec3::Zero()));
+			Vec3 lightDirection = Vec3(0.0f, 0.0f, 1.0f);
+			Vec3 ambientLight(0.15f, 0.15f, 0.15f);
+			Vec3 resultColor = Vec3::Dot(lightDirection, fragment.m_Normal) * Vec3::One();
+			resultColor.x = std::max(ambientLight.x, resultColor.x);
+			resultColor.y = std::max(ambientLight.y, resultColor.y);
+			resultColor.z = std::max(ambientLight.z, resultColor.z);
+
 			return
 			{
 				{
@@ -108,9 +127,9 @@ public:
 				fragment.m_Position.z,
 				Color
 				(
-					static_cast<unsigned char>(fragment.m_Color.x * 255),
-					static_cast<unsigned char>(fragment.m_Color.y * 255),
-					static_cast<unsigned char>(fragment.m_Color.z * 255)
+					static_cast<unsigned char>(resultColor.x * 255),
+					static_cast<unsigned char>(resultColor.y * 255),
+					static_cast<unsigned char>(resultColor.z * 255)
 				)
 			};
 		}

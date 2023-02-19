@@ -24,7 +24,7 @@
 #include "Mouse.h"
 #include "Graphics.h"
 #include "GraphicsPipeline.h"
-#include "VertexColorShaderProgram.h"
+#include "DirectionalLightningShaderProgram.h"
 #include "Mat4.h"
 
 class Game
@@ -43,7 +43,7 @@ private:
 private:
 	MainWindow& wnd;
 	Graphics gfx;
-	GraphicsPipeline<VertexColorShaderProgram> pipeline;
+	GraphicsPipeline<DirectionalLightningShaderProgram> pipeline;
 
 	Vec3 camPosition;
 	Vec3 trianglePosition;

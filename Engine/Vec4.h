@@ -63,6 +63,8 @@ public:
 		return *this;
 	}
 
+	_Vec4 operator-() { return { -x, -y, -z }; }
+
 	friend _Vec4 operator*(T lhs, const _Vec4& rhs) { return _Vec4(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z); }
 	friend _Vec4 operator*(const _Vec4& lhs, T rhs) { return rhs * lhs; }
 	_Vec4& operator*=(T rhs)
@@ -74,7 +76,18 @@ public:
 		return *this;
 	}
 
-	_Vec4 operator-() { return { -x, -y, -z }; }
+	friend _Vec4 operator/(const _Vec4& lhs, T rhs) { return lhs * ((T)1.0 / rhs); }
+	_Vec4& operator/=(T rhs) { return *this = *this * ((T)1.0 / rhs); }
+
+	static auto Magnitude(const _Vec4& value)
+	{
+		return static_cast<T>(std::sqrt(value.x * value.x + value.y * value.y + value.z * value.z));
+	}
+	static _Vec4 Normalize(const _Vec4& value)
+	{
+		float magnitude = _Vec4::Magnitude(value);
+		return value / magnitude;
+	}
 
 	static auto Dot(const _Vec4& lhs, const _Vec4& rhs)
 	{
@@ -99,7 +112,7 @@ public:
 	static constexpr _Vec4 Left() { return _Vec3<T>::Left(); }
 	static constexpr _Vec4 Right() { return _Vec3<T>::Right(); }
 	static constexpr _Vec4 Zero() { return _Vec3<T>::Zero(); }
-	static constexpr _Vec4 One() { return _Vec3<T>::One(); }
+	static constexpr _Vec4 One() { return { 1.0f, 1.0f, 1.0f, 1.0f }; }
 };
 
 using Vec4 = _Vec4<float>;

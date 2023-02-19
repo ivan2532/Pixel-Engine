@@ -63,28 +63,38 @@ void Game::ComposeFrame()
 	Mat4 projection = Mat4::PerspectiveProjection(0.1f, 100.0f, 90.0f * (static_cast<float>(M_PI) / 180.0f), Graphics::AspectRatio);
 
 	pipeline.BindIndices({ 0, 1, 2 });
+	/*pipeline.BindVertices
+	(
+		{
+			{ Vec3{ 2.0f, -2.0f, 0.0f }  , Vec3(0.0f, 0.0f, 1.0f), Vec3{1.0f, 0.0f, 0.0f}},
+			{ Vec3{ 0.0f, 2.0f, 0.0f }   , Vec3(0.0f, 0.0f, 1.0f), Vec3{ 0.0f, 1.0f, 0.0f } },
+			{ Vec3{ -2.0f, -2.0f, 0.0f } , Vec3(0.0f, 0.0f, 1.0f), Vec3{ 0.0f, 0.0f, 1.0f } }
+		}
+	);*/
 	pipeline.BindVertices
 	(
 		{
-			{ Vec3{ 2.0f, -2.0f, 0.0f }, Vec3{ 0.0f, 1.0f, 0.0f } },
-			{ Vec3{ 0.0f, 2.0f, 0.0f }, Vec3{ 0.0f, 1.0f, 0.0f } },
-			{ Vec3{ -2.0f, -2.0f, 0.0f }, Vec3{ 0.0f, 1.0f, 0.0f } }
+			{ Vec3{ 2.0f, -2.0f, 0.0f }  , Vec3(0.0f, 0.0f, 1.0f) },
+			{ Vec3{ 0.0f, 2.0f, 0.0f }   , Vec3(0.0f, 0.0f, 1.0f) },
+			{ Vec3{ -2.0f, -2.0f, 0.0f } , Vec3(0.0f, 0.0f, 1.0f) }
 		}
 	);
 	pipeline.GetVertexShader().SetMVP(projection * view * model);
+	pipeline.GetVertexShader().SetMV(view * model);
 	pipeline.Draw();
 
-	pipeline.BindIndices({ 0, 1, 2 });
+	/*pipeline.BindIndices({ 0, 1, 2 });
 	pipeline.BindVertices
 	(
 		{
-			{ Vec3{ 2.0f, -2.0f, 0.0f }, Vec3{ 0.5f, 0.5f, 0.5f } },
-			{ Vec3{ 0.0f, 2.0f, 0.0f }, Vec3{ 0.5f, 0.5f, 0.5f } },
-			{ Vec3{ -2.0f, -2.0f, 0.0f }, Vec3{ 0.5f, 0.5f, 0.5f } }
+			{ Vec3{ 2.0f, -2.0f, 0.0f }, Vec3(0.0f, 0.0f, 1.0f), Vec3{ 0.5f, 0.5f, 0.5f } },
+			{ Vec3{ 0.0f, 2.0f, 0.0f }, Vec3(0.0f, 0.0f, 1.0f), Vec3{ 0.5f, 0.5f, 0.5f } },
+			{ Vec3{ -2.0f, -2.0f, 0.0f }, Vec3(0.0f, 0.0f, 1.0f), Vec3{ 0.5f, 0.5f, 0.5f } }
 		}
 	);
 	pipeline.GetVertexShader().SetMVP(projection * view);
-	pipeline.Draw();
+	pipeline.GetVertexShader().SetMV(view);
+	pipeline.Draw();*/
 
 	pipeline.ClearZBuffer();
 }
