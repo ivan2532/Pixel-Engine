@@ -28,9 +28,9 @@ Game::Game( MainWindow& wnd )
 	:
 	wnd( wnd ),
 	gfx( wnd ),
-	pipeline( gfx ),
-	camPosition(0.0f, 0.0f, 5.0f)
+	scene(gfx, wnd)
 {
+	scene.Start();
 }
 
 void Game::Go()
@@ -43,58 +43,10 @@ void Game::Go()
 
 void Game::UpdateModel()
 {
-	if (wnd.kbd.KeyIsPressed('W')) trianglePosition.z -= 0.05f;
-	if (wnd.kbd.KeyIsPressed('S')) trianglePosition.z += 0.05f;
-	if (wnd.kbd.KeyIsPressed('A')) trianglePosition.x -= 0.05f;
-	if (wnd.kbd.KeyIsPressed('D')) trianglePosition.x += 0.05f;
-	if (wnd.kbd.KeyIsPressed('Q')) trianglePosition.y += 0.05f;
-	if (wnd.kbd.KeyIsPressed('E')) trianglePosition.y -= 0.05f;
-
-	if (wnd.kbd.KeyIsPressed(VK_LEFT)) triangleEulerAngles.y += 0.05f;
-	if (wnd.kbd.KeyIsPressed(VK_RIGHT)) triangleEulerAngles.y -= 0.05f;
-	if (wnd.kbd.KeyIsPressed(VK_UP)) triangleEulerAngles.x += 0.05f;
-	if (wnd.kbd.KeyIsPressed(VK_DOWN)) triangleEulerAngles.x -= 0.05f;
+	scene.Update();
 }
 
 void Game::ComposeFrame()
 {
-	Mat4 model = Mat4::Translate(trianglePosition) *Mat4::RotateX(triangleEulerAngles.x)* Mat4::RotateY(triangleEulerAngles.y)* Mat4::RotateZ(triangleEulerAngles.z);
-	Mat4 view = Mat4::Translate(-camPosition);
-	Mat4 projection = Mat4::PerspectiveProjection(0.1f, 100.0f, 90.0f * (static_cast<float>(M_PI) / 180.0f), Graphics::AspectRatio);
-
-	pipeline.BindIndices({ 0, 1, 2 });
-	/*pipeline.BindVertices
-	(
-		{
-			{ Vec3{ 2.0f, -2.0f, 0.0f }  , Vec3(0.0f, 0.0f, 1.0f), Vec3{1.0f, 0.0f, 0.0f}},
-			{ Vec3{ 0.0f, 2.0f, 0.0f }   , Vec3(0.0f, 0.0f, 1.0f), Vec3{ 0.0f, 1.0f, 0.0f } },
-			{ Vec3{ -2.0f, -2.0f, 0.0f } , Vec3(0.0f, 0.0f, 1.0f), Vec3{ 0.0f, 0.0f, 1.0f } }
-		}
-	);*/
-	pipeline.BindVertices
-	(
-		{
-			{ Vec3{ 2.0f, -2.0f, 0.0f }  , Vec3(0.0f, 0.0f, 1.0f) },
-			{ Vec3{ 0.0f, 2.0f, 0.0f }   , Vec3(0.0f, 0.0f, 1.0f) },
-			{ Vec3{ -2.0f, -2.0f, 0.0f } , Vec3(0.0f, 0.0f, 1.0f) }
-		}
-	);
-	pipeline.GetVertexShader().SetMVP(projection * view * model);
-	pipeline.GetVertexShader().SetMV(view * model);
-	pipeline.Draw();
-
-	/*pipeline.BindIndices({ 0, 1, 2 });
-	pipeline.BindVertices
-	(
-		{
-			{ Vec3{ 2.0f, -2.0f, 0.0f }, Vec3(0.0f, 0.0f, 1.0f), Vec3{ 0.5f, 0.5f, 0.5f } },
-			{ Vec3{ 0.0f, 2.0f, 0.0f }, Vec3(0.0f, 0.0f, 1.0f), Vec3{ 0.5f, 0.5f, 0.5f } },
-			{ Vec3{ -2.0f, -2.0f, 0.0f }, Vec3(0.0f, 0.0f, 1.0f), Vec3{ 0.5f, 0.5f, 0.5f } }
-		}
-	);
-	pipeline.GetVertexShader().SetMVP(projection * view);
-	pipeline.GetVertexShader().SetMV(view);
-	pipeline.Draw();*/
-
-	pipeline.ClearZBuffer();
+	scene.Draw();
 }

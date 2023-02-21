@@ -25,6 +25,7 @@
 #include "Graphics.h"
 #include "GraphicsPipeline.h"
 #include "DirectionalLightningShaderProgram.h"
+#include "DirectionalLightningTriangleScene.h"
 #include "Mat4.h"
 
 class Game
@@ -43,13 +44,9 @@ private:
 private:
 	MainWindow& wnd;
 	Graphics gfx;
-	GraphicsPipeline<DirectionalLightningShaderProgram> pipeline;
-
-	Vec3 camPosition;
-	Vec3 trianglePosition;
-	Vec3 triangleEulerAngles;
-
 	/********************************/
 	/*  User Variables              */
 	/********************************/
+
+	DirectionalLightningTriangleScene scene;
 };

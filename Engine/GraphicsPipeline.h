@@ -5,16 +5,17 @@
 #include <cmath>
 #include <limits>
 
+#include "Vec3.h"
 #include "Graphics.h"
 
-template <class ShaderProgram>
+template <class TShaderProgram>
 class GraphicsPipeline
 {
-	typedef typename ShaderProgram::VertexShader VertexShader;
-	typedef typename ShaderProgram::PixelShader PixelShader;
-	typedef typename ShaderProgram::VSIn VSIn;
-	typedef typename ShaderProgram::VSOut VSOut;
-	typedef typename ShaderProgram::PSOut PSOut;
+	typedef typename TShaderProgram::VertexShader VertexShader;
+	typedef typename TShaderProgram::PixelShader PixelShader;
+	typedef typename TShaderProgram::VSIn VSIn;
+	typedef typename TShaderProgram::VSOut VSOut;
+	typedef typename TShaderProgram::PSOut PSOut;
 
 public:
 	GraphicsPipeline(Graphics& graphics);
@@ -23,8 +24,8 @@ public:
 	VertexShader& GetVertexShader() { return m_VertexShader; }
 	PixelShader& GetPixelShader() { return m_PixelShader; }
 
-	void BindIndices(const std::vector<size_t>& value);
-	void BindVertices(const std::vector<VSIn>& value);
+	void BindIndices(const std::vector<size_t>& indices);
+	void BindVertices(const std::vector<VSIn>& input);
 	void Draw();
 	void ClearZBuffer();
 
@@ -71,8 +72,8 @@ private:
 
 #pragma region Definitions
 
-template<class ShaderProgram>
-inline GraphicsPipeline<ShaderProgram>::GraphicsPipeline(Graphics& graphics)
+template<class TShaderProgram>
+inline GraphicsPipeline<TShaderProgram>::GraphicsPipeline(Graphics& graphics)
 	:
 	m_Graphics(graphics)
 {
@@ -83,8 +84,8 @@ inline GraphicsPipeline<ShaderProgram>::GraphicsPipeline(Graphics& graphics)
 	}
 }
 
-template<class ShaderProgram>
-inline GraphicsPipeline<ShaderProgram>::~GraphicsPipeline()
+template<class TShaderProgram>
+inline GraphicsPipeline<TShaderProgram>::~GraphicsPipeline()
 {
 	for (int i = 0; i < Graphics::ScreenHeight; i++)
 	{
@@ -94,27 +95,27 @@ inline GraphicsPipeline<ShaderProgram>::~GraphicsPipeline()
 	delete[] zBuffer;
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::BindIndices(const std::vector<size_t>& value)
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::BindIndices(const std::vector<size_t>& indices)
 {
-	assert(value.size() % 3 == 0);
-	m_InputIndices = value;
+	assert(indices.size() % 3 == 0);
+	m_InputIndices = indices;
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::BindVertices(const std::vector<VSIn>& value)
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::BindVertices(const std::vector<VSIn>& input)
 {
-	m_InputVertices = value;
+	m_InputVertices = input;
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::Draw()
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::Draw()
 {
 	VertexProcessing();
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::VertexProcessing()
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::VertexProcessing()
 {
 	m_TransformedVertices.clear();
 
@@ -126,8 +127,8 @@ inline void GraphicsPipeline<ShaderProgram>::VertexProcessing()
 	TriangleAssembly();
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::TriangleAssembly()
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::TriangleAssembly()
 {
 	for (auto it = m_TransformedVertices.begin(); it != m_TransformedVertices.end(); std::advance(it, 3))
 	{
@@ -135,8 +136,8 @@ inline void GraphicsPipeline<ShaderProgram>::TriangleAssembly()
 	}
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::Clipping(VSOut& v1, VSOut& v2, VSOut& v3)
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::Clipping(VSOut& v1, VSOut& v2, VSOut& v3)
 {
 	// Clip triangles completley out of the view volume
 	// Left and right plane
@@ -224,15 +225,15 @@ inline void GraphicsPipeline<ShaderProgram>::Clipping(VSOut& v1, VSOut& v2, VSOu
 	ScreenMapping(v1, v2, v3);
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::ScreenMapping(VSOut v1, VSOut v2, VSOut v3)
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::ScreenMapping(VSOut v1, VSOut v2, VSOut v3)
 {
 	NDCSpaceToScreenSpaceTriangle(v1, v2, v3);
 	Rasterization(v1, v2, v3);
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::Rasterization(const VSOut& v1, const VSOut& v2, const VSOut& v3)
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::Rasterization(const VSOut& v1, const VSOut& v2, const VSOut& v3)
 {
 	// Sort vertices by y (from bottom to top on screen)
 	// because the order could be messed up from clipping
@@ -263,8 +264,8 @@ inline void GraphicsPipeline<ShaderProgram>::Rasterization(const VSOut& v1, cons
 	DrawFlatBottomTriangle(vSplit, *pv2, *pv3);
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::PixelProcessing(const VSOut& fragment)
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::PixelProcessing(const VSOut& fragment)
 {
 	if (earlyZ)
 	{
@@ -286,14 +287,14 @@ inline void GraphicsPipeline<ShaderProgram>::PixelProcessing(const VSOut& fragme
 	}
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::Merging(PSOut p)
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::Merging(PSOut p)
 {
 	m_Graphics.PutPixel(p.m_Position.x, p.m_Position.y, p.m_Color);
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::MergingWithDepthCheck(PSOut p)
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::MergingWithDepthCheck(PSOut p)
 {
 	Vei2 screenPosition(p.m_Position.x, p.m_Position.y);
 
@@ -304,8 +305,8 @@ inline void GraphicsPipeline<ShaderProgram>::MergingWithDepthCheck(PSOut p)
 	}
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::ClipSpaceToNDCSpaceVertex(VSOut& v)
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::ClipSpaceToNDCSpaceVertex(VSOut& v)
 {
 	v.m_Position.x /= v.m_Position.w;
 	v.m_Position.y /= v.m_Position.w;
@@ -313,31 +314,31 @@ inline void GraphicsPipeline<ShaderProgram>::ClipSpaceToNDCSpaceVertex(VSOut& v)
 	v.m_Position.w = 1.0f;
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::ClipSpaceToNDCSpaceTriangle(VSOut& v1, VSOut& v2, VSOut& v3)
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::ClipSpaceToNDCSpaceTriangle(VSOut& v1, VSOut& v2, VSOut& v3)
 {
 	ClipSpaceToNDCSpaceVertex(v1);
 	ClipSpaceToNDCSpaceVertex(v2);
 	ClipSpaceToNDCSpaceVertex(v3);
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::NDCSpaceToScreenSpaceVertex(VSOut& v)
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::NDCSpaceToScreenSpaceVertex(VSOut& v)
 {
 	v.m_Position.x = Graphics::ScreenWidth / 2.0f * (1 + v.m_Position.x);
 	v.m_Position.y = Graphics::ScreenHeight / 2.0f * (1 - v.m_Position.y);
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::NDCSpaceToScreenSpaceTriangle(VSOut& v1, VSOut& v2, VSOut& v3)
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::NDCSpaceToScreenSpaceTriangle(VSOut& v1, VSOut& v2, VSOut& v3)
 {
 	NDCSpaceToScreenSpaceVertex(v1);
 	NDCSpaceToScreenSpaceVertex(v2);
 	NDCSpaceToScreenSpaceVertex(v3);
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::ClearZBuffer()
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::ClearZBuffer()
 {
 	for (int i = 0; i < Graphics::ScreenHeight; i++)
 	{
@@ -348,8 +349,8 @@ inline void GraphicsPipeline<ShaderProgram>::ClearZBuffer()
 	}
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::DrawFlatTopTriangle(const VSOut& v1, const VSOut& v2, const VSOut& v3)
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::DrawFlatTopTriangle(const VSOut& v1, const VSOut& v2, const VSOut& v3)
 {
 	const VSOut* pv2 = &v2;
 	const VSOut* pv3 = &v3;
@@ -364,8 +365,8 @@ inline void GraphicsPipeline<ShaderProgram>::DrawFlatTopTriangle(const VSOut& v1
 	);
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::DrawFlatBottomTriangle(const VSOut& v1, const VSOut& v2, const VSOut& v3)
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::DrawFlatBottomTriangle(const VSOut& v1, const VSOut& v2, const VSOut& v3)
 {
 	const VSOut* pv1 = &v1;
 	const VSOut* pv2 = &v2;
@@ -380,8 +381,8 @@ inline void GraphicsPipeline<ShaderProgram>::DrawFlatBottomTriangle(const VSOut&
 	);
 }
 
-template<class ShaderProgram>
-inline void GraphicsPipeline<ShaderProgram>::DrawFlatTriangle(const VSOut& bottom, const VSOut& top, const VSOut& leftFrom, const VSOut& leftTo, const VSOut& rightFrom, const VSOut& rightTo)
+template<class TShaderProgram>
+inline void GraphicsPipeline<TShaderProgram>::DrawFlatTriangle(const VSOut& bottom, const VSOut& top, const VSOut& leftFrom, const VSOut& leftTo, const VSOut& rightFrom, const VSOut& rightTo)
 {
 	// Round because of point sampling (draw pixel if it's center is inside the triangle)
 	int startY = static_cast<int>(std::roundf(bottom.m_Position.y));

@@ -76,16 +76,11 @@ public:
 	public:
 		VSOut Main(const VSIn& vIn)
 		{
-			Mat4 normalTransform = m_MV;
-			normalTransform[0][3] = 0.0f;
-			normalTransform[1][3] = 0.0f;
-			normalTransform[2][3] = 0.0f;
-
 			return VSOut
 			(
 				m_MVP * vIn.m_Position,
 				m_MV * vIn.m_Position,
-				Vec3::Normalize(normalTransform * vIn.m_Normal)
+				Vec3::Normalize(m_MV * Vec4(vIn.m_Normal.x, vIn.m_Normal.y, vIn.m_Normal.z, 0.0f))
 			);
 		}
 
@@ -110,7 +105,6 @@ public:
 	public:
 		PSOut Main(const VSOut& fragment)
 		{
-			//Vec3 lightDirection = Vec3::Normalize((static_cast<Vec3>(fragment.m_WorldPosition) - Vec3::Zero()));
 			Vec3 lightDirection = Vec3(0.0f, 0.0f, 1.0f);
 			Vec3 ambientLight(0.15f, 0.15f, 0.15f);
 			Vec3 resultColor = Vec3::Dot(lightDirection, fragment.m_Normal) * Vec3::One();
