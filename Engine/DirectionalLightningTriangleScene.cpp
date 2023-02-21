@@ -7,7 +7,7 @@ DirectionalLightningTriangleScene::DirectionalLightningTriangleScene(Graphics& g
 	:
 	m_Pipeline(graphics),
 	m_Window(window),
-	m_Suzanne("Suzanne_1.obj")
+	m_Suzanne("models/suzanne.obj")
 {
 	auto vertices = m_Suzanne.GetVertices();
 	auto normals = m_Suzanne.GetNormals();
