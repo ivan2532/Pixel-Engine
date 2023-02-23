@@ -142,10 +142,12 @@
     <ClInclude Include="Colors.h" />
     <ClInclude Include="COMInitializer.h" />
     <ClInclude Include="DirectionalLightningShaderProgram.h" />
-    <ClInclude Include="DirectionalLightningTriangleScene.h" />
+    <ClInclude Include="DirectionalLightningScene.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="OBJ_Loader.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="stb_image.h" />
+    <ClInclude Include="TexturedDirectionalLightningShaderProgram.h" />
     <ClInclude Include="VertexColorShaderProgram.h" />
     <ClInclude Include="DXErr.h" />
     <ClInclude Include="Game.h" />

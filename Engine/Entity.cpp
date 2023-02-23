@@ -23,6 +23,11 @@ Entity::Entity(const std::string& modelPath, const Vec3& position, const Vec3& e
 	UpdateModelTransform();
 }
 
+const std::vector<size_t>& Entity::GetIndices() const
+{
+	return m_Indices;
+}
+
 const std::vector<Vec3>& Entity::GetVertices() const
 {
 	return m_Vertices;
@@ -33,9 +38,9 @@ const std::vector<Vec3>& Entity::GetNormals() const
 	return m_Normals;
 }
 
-const std::vector<size_t>& Entity::GetIndices() const
+const std::vector<Vec2>& Entity::GetUvCoordinates() const
 {
-	return m_Indices;
+	return m_UvCoordinates;
 }
 
 void Entity::SetPosition(const Vec3& position)
@@ -70,6 +75,7 @@ void Entity::LoadModelFromFile(const std::string& path)
 	{
 		m_Indices.clear();
 		m_Vertices.clear();
+		m_UvCoordinates.clear();
 		m_Normals.clear();
 
 		for (auto index : loader.LoadedIndices)
@@ -80,6 +86,7 @@ void Entity::LoadModelFromFile(const std::string& path)
 		for (const auto& vertex : loader.LoadedVertices)
 		{
 			m_Vertices.push_back(Vec3(vertex.Position.X, vertex.Position.Y, vertex.Position.Z));
+			m_UvCoordinates.push_back(Vec2(vertex.TextureCoordinate.X, vertex.TextureCoordinate.Y));
 			m_Normals.push_back(Vec3(vertex.Normal.X, vertex.Normal.Y, vertex.Normal.Z));
 		}
 	}

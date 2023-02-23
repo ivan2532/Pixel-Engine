@@ -23,9 +23,8 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 #include "Graphics.h"
-#include "GraphicsPipeline.h"
 #include "DirectionalLightningShaderProgram.h"
-#include "DirectionalLightningTriangleScene.h"
+#include "DirectionalLightningScene.h"
 #include "Mat4.h"
 
 class Game
@@ -48,5 +47,5 @@ private:
 	/*  User Variables              */
 	/********************************/
 
-	DirectionalLightningTriangleScene scene;
+	DirectionalLightningScene scene;
 };

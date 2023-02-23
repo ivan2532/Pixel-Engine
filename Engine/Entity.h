@@ -24,9 +24,10 @@ public:
 		const Vec3& eulerAngles = Vec3::Zero()
 	);
 
+	const std::vector<size_t>& GetIndices() const;
 	const std::vector<Vec3>& GetVertices() const;
 	const std::vector<Vec3>& GetNormals() const;
-	const std::vector<size_t>& GetIndices() const;
+	const std::vector<Vec2>& GetUvCoordinates() const;
 
 	void SetPosition(const Vec3& position);
 	void SetRotation(const Vec3& eulerAngles);
@@ -40,9 +41,10 @@ public:
 private:
 	void LoadModelFromFile(const std::string& path);
 
+	std::vector<size_t> m_Indices;
 	std::vector<Vec3> m_Vertices;
 	std::vector<Vec3> m_Normals;
-	std::vector<size_t> m_Indices;
+	std::vector<Vec2> m_UvCoordinates;
 
 	Vec3 m_Position;
 	Vec3 m_EulerAngles;
