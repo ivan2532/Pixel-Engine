@@ -33,17 +33,11 @@ public:
 		result.x = lhs.x + rhs.x;
 		result.y = lhs.y + rhs.y;
 		result.z = lhs.z + rhs.z;
+		result.w = lhs.w + rhs.w;
 
 		return result;
 	}
-	_Vec4& operator+=(const _Vec4& rhs)
-	{
-		T originalW = this->w;
-		*this = *this + rhs;
-		this->w = originalW;
-
-		return *this;
-	}
+	_Vec4& operator+=(const _Vec4& rhs) { return *this = *this + rhs; }
 
 	friend _Vec4 operator-(const _Vec4& lhs, const _Vec4& rhs)
 	{
@@ -51,30 +45,17 @@ public:
 		result.x = lhs.x - rhs.x;
 		result.y = lhs.y - rhs.y;
 		result.z = lhs.z - rhs.z;
+		result.w = lhs.w - rhs.w;
 
 		return result;
 	}
-	_Vec4& operator-=(const _Vec4& rhs)
-	{
-		T originalW = this->w;
-		*this = *this - rhs;
-		this->w = originalW;
+	_Vec4& operator-=(const _Vec4& rhs) { return this->w = originalW; }
 
-		return *this;
-	}
+	_Vec4 operator-() { return { -x, -y, -z, -w }; }
 
-	_Vec4 operator-() { return { -x, -y, -z }; }
-
-	friend _Vec4 operator*(T lhs, const _Vec4& rhs) { return _Vec4(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z); }
+	friend _Vec4 operator*(T lhs, const _Vec4& rhs) { return _Vec4(lhs * rhs.x, lhs * rhs.y, lhs * rhs.z, lhs * rhs.w); }
 	friend _Vec4 operator*(const _Vec4& lhs, T rhs) { return rhs * lhs; }
-	_Vec4& operator*=(T rhs)
-	{
-		T originalW = this->w;
-		*this = *this * rhs;
-		this->w = originalW;
-
-		return *this;
-	}
+	_Vec4& operator*=(T rhs) { return this->w = originalW; }
 
 	friend _Vec4 operator/(const _Vec4& lhs, T rhs) { return lhs * ((T)1.0 / rhs); }
 	_Vec4& operator/=(T rhs) { return *this = *this * ((T)1.0 / rhs); }

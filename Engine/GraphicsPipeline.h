@@ -45,12 +45,11 @@ private:
 	std::vector<VSOut> m_TransformedVertices;
 
 	float** zBuffer;
-	const bool earlyZ = true;
 
-	unsigned char* textureData = nullptr;
-	int textureWidth = 0;
-	int textureHeight = 0;
-	int textureNumOfChannels = 0;
+	unsigned char* m_TextureData = nullptr;
+	int m_TextureWidth = 0;
+	int m_TextureHeight = 0;
+	int m_TextureNumOfChannels = 0;
 
 	#pragma region Pipeline stages
 
@@ -59,9 +58,8 @@ private:
 	void Clipping(VSOut& v1, VSOut& v2, VSOut& v3);
 	void ScreenMapping(VSOut v1, VSOut v2, VSOut v3);
 	void Rasterization(const VSOut& v1, const VSOut& v2, const VSOut& v3);
-	void PixelProcessing(VSOut& fragment);
-	void Merging(PSOut p);
-	void MergingWithDepthCheck(PSOut p);
+	void PixelProcessing(int screenX, int screenY, VSOut& fragment);
+	void Merging(int screenX, int screenY, PSOut p);
 
 	#pragma endregion
 
@@ -121,14 +119,14 @@ template<class TShaderProgram>
 inline void GraphicsPipeline<TShaderProgram>::LoadTexture(const std::string& path)
 {
 	UnloadTexture();
-	textureData = stbi_load(path.c_str(), &textureWidth, &textureHeight, &textureNumOfChannels, 3);
+	m_TextureData = stbi_load(path.c_str(), &m_TextureWidth, &m_TextureHeight, &m_TextureNumOfChannels, 3);
 }
 
 template<class TShaderProgram>
 inline void GraphicsPipeline<TShaderProgram>::UnloadTexture()
 {
-	stbi_image_free(textureData);
-	textureData = nullptr;
+	stbi_image_free(m_TextureData);
+	m_TextureData = nullptr;
 }
 
 template<class TShaderProgram>
@@ -288,92 +286,49 @@ inline void GraphicsPipeline<TShaderProgram>::Rasterization(const VSOut& v1, con
 }
 
 template<class TShaderProgram>
-inline void GraphicsPipeline<TShaderProgram>::PixelProcessing(VSOut& fragment)
+inline void GraphicsPipeline<TShaderProgram>::PixelProcessing(int screenX, int screenY, VSOut& fragment)
 {
-	auto applyTexture = [this](VSOut& fragment)
+	if (fragment.m_Position.z < zBuffer[screenY][screenX])
 	{
-		Vei2 textureCoordinates
-		(
-			std::roundf(fragment.m_UvCoordinates.x * textureWidth),
-			std::roundf((1.0f - fragment.m_UvCoordinates.y) * textureHeight)
-		);
+		zBuffer[screenY][screenX] = fragment.m_Position.z;
 
-		int yOffset = textureCoordinates.y * textureWidth;
-		int xOffset = textureCoordinates.x;
-
-		int textureArrayIndex = std::min((yOffset + xOffset) * 3, (textureWidth * textureHeight) * 3 - 1);
-
-		fragment.m_Color = Vec3
-		(
-			static_cast<float>(textureData[textureArrayIndex]) / 255.0f,
-			static_cast<float>(textureData[textureArrayIndex + 1]) / 255.0f,
-			static_cast<float>(textureData[textureArrayIndex + 2]) / 255.0f
-		);
-
-		Vei3 test
-		(
-			textureData[yOffset + xOffset],
-			textureData[yOffset + xOffset + 1],
-			textureData[yOffset + xOffset + 2]
-		);
-	};
-
-	if (earlyZ)
-	{
-		Vei2 screenPosition
-		(
-			static_cast<int>(fragment.m_Position.x),
-			static_cast<int>(fragment.m_Position.y)
-		);
-
-		if (fragment.m_Position.z < zBuffer[screenPosition.y][screenPosition.x])
+		if (m_TextureData != nullptr)
 		{
-			zBuffer[screenPosition.y][screenPosition.x] = fragment.m_Position.z;
+			Vei2 textureCoordinates
+			(
+				std::roundf(fragment.m_UvCoordinates.x * m_TextureWidth),
+				std::roundf((1.0f - fragment.m_UvCoordinates.y) * m_TextureHeight)
+			);
 
-			if (textureData != nullptr)
-			{
-				applyTexture(fragment);
-			}
+			int yOffset = textureCoordinates.y * m_TextureWidth;
+			int xOffset = textureCoordinates.x;
 
-			Merging(m_PixelShader.Main(fragment));
-		}
-	}
-	else
-	{
-		if (textureData != nullptr)
-		{
-			applyTexture(fragment);
+			int textureArrayIndex = std::min((yOffset + xOffset) * 3, (m_TextureWidth * m_TextureHeight) * 3 - 1);
+
+			fragment.m_Color = Vec3
+			(
+				static_cast<float>(m_TextureData[textureArrayIndex]) / 255.0f,
+				static_cast<float>(m_TextureData[textureArrayIndex + 1]) / 255.0f,
+				static_cast<float>(m_TextureData[textureArrayIndex + 2]) / 255.0f
+			);
 		}
 
-		MergingWithDepthCheck(m_PixelShader.Main(fragment));
+		Merging(screenX, screenY, m_PixelShader.Main(fragment));
 	}
 }
 
 template<class TShaderProgram>
-inline void GraphicsPipeline<TShaderProgram>::Merging(PSOut p)
+inline void GraphicsPipeline<TShaderProgram>::Merging(int screenX, int screenY, PSOut p)
 {
-	m_Graphics.PutPixel(p.m_Position.x, p.m_Position.y, p.m_Color);
-}
-
-template<class TShaderProgram>
-inline void GraphicsPipeline<TShaderProgram>::MergingWithDepthCheck(PSOut p)
-{
-	Vei2 screenPosition(p.m_Position.x, p.m_Position.y);
-
-	if (p.z < zBuffer[screenPosition.y][screenPosition.x])
-	{
-		zBuffer[screenPosition.y][screenPosition.x] = p.z;
-		m_Graphics.PutPixel(screenPosition.x, screenPosition.y, p.m_Color);
-	}
+	m_Graphics.PutPixel(screenX, screenY, p.m_Color);
 }
 
 template<class TShaderProgram>
 inline void GraphicsPipeline<TShaderProgram>::ClipSpaceToNDCSpaceVertex(VSOut& v)
 {
-	v.m_Position.x /= v.m_Position.w;
-	v.m_Position.y /= v.m_Position.w;
-	v.m_Position.z /= v.m_Position.w;
-	v.m_Position.w = 1.0f;
+	const auto wInverse = 1.0f / v.m_Position.w;
+	v *= wInverse;
+	v.m_Position.w = wInverse;
 }
 
 template<class TShaderProgram>
@@ -483,10 +438,11 @@ inline void GraphicsPipeline<TShaderProgram>::DrawFlatTriangle(const VSOut& bott
 
 			const float tX = (curX - startX) / deltaX;
 			VSOut fragment = VSOut::Lerp(left, right, tX);
-			fragment.m_Position.x = static_cast<float>(curX);
-			fragment.m_Position.y = static_cast<float>(curY);
 
-			PixelProcessing(fragment);
+			const float w = 1.0f / fragment.m_Position.w;
+			fragment *= w;
+
+			PixelProcessing(curX, curY, fragment);
 		}
 	}
 }

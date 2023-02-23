@@ -38,10 +38,10 @@ void DirectionalLightningScene::Update()
 	if (m_Window.kbd.KeyIsPressed('Q')) m_Model.Translate(Vec3(0.0f, 0.05f, 0.0f));
 	if (m_Window.kbd.KeyIsPressed('E')) m_Model.Translate(Vec3(0.0f, -0.05f, 0.0f));
 
-	if (m_Window.kbd.KeyIsPressed(VK_LEFT)) m_Model.Rotate(Vec3(0.0f, 0.05f, 0.0f));
-	if (m_Window.kbd.KeyIsPressed(VK_RIGHT)) m_Model.Rotate(Vec3(0.0f, -0.05f, 0.0f));
-	if (m_Window.kbd.KeyIsPressed(VK_UP)) m_Model.Rotate(Vec3(0.05f, 0.0f, 0.0f));
-	if (m_Window.kbd.KeyIsPressed(VK_DOWN)) m_Model.Rotate(Vec3(-0.05f, 0.0f, 0.0f));
+	if (m_Window.kbd.KeyIsPressed(VK_LEFT)) m_Model.Rotate(Vec3(0.0f, -0.05f, 0.0f));
+	if (m_Window.kbd.KeyIsPressed(VK_RIGHT)) m_Model.Rotate(Vec3(0.0f, 0.05f, 0.0f));
+	if (m_Window.kbd.KeyIsPressed(VK_UP)) m_Model.Rotate(Vec3(-0.05f, 0.0f, 0.0f));
+	if (m_Window.kbd.KeyIsPressed(VK_DOWN)) m_Model.Rotate(Vec3(0.05f, 0.0f, 0.0f));
 
 	m_Model.UpdateModelTransform();
 }

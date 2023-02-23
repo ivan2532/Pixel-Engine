@@ -116,12 +116,10 @@ public:
 		PSOut Main(const VSOut& fragment)
 		{
 			Vec3 lightDirection = Vec3(0.0f, 0.0f, 1.0f);
-			Vec3 ambientLight(0.15f, 0.15f, 0.15f);
+			float ambientLightning = 0.15f;
 
-			Vec3 resultColor = Vec3::Dot(lightDirection, fragment.m_Normal) * fragment.m_Color;
-			resultColor.x = std::max(ambientLight.x, resultColor.x);
-			resultColor.y = std::max(ambientLight.y, resultColor.y);
-			resultColor.z = std::max(ambientLight.z, resultColor.z);
+			auto lightFactor = std::max(Vec3::Dot(lightDirection, fragment.m_Normal), ambientLightning);
+			Vec3 resultColor = lightFactor * fragment.m_Color;
 
 			return
 			{
