@@ -5,6 +5,8 @@
 #include <cmath>
 #include <limits>
 
+#include "stb_image.h"
+
 #include "Vec3.h"
 #include "Graphics.h"
 
@@ -100,6 +102,8 @@ inline GraphicsPipeline<TShaderProgram>::~GraphicsPipeline()
 	}
 
 	delete[] zBuffer;
+
+	UnloadTexture();
 }
 
 template<class TShaderProgram>
