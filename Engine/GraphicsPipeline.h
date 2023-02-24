@@ -316,6 +316,10 @@ inline void GraphicsPipeline<TShaderProgram>::PixelProcessing(int screenX, int s
 				static_cast<float>(m_TextureData[textureArrayIndex + 2]) / 255.0f
 			);
 		}
+		else
+		{
+			fragment.m_Color = Vec3::One();
+		}
 
 		Merging(screenX, screenY, m_PixelShader.Main(fragment));
 	}
