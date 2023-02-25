@@ -74,7 +74,7 @@ private:
 
 	void DrawFlatTopTriangle(const VSOut& v1, const VSOut& v2, const VSOut& v3);
 	void DrawFlatBottomTriangle(const VSOut& v1, const VSOut& v2, const VSOut& v3);
-	void DrawFlatTriangle(const VSOut& bottom, const VSOut& top, const VSOut& leftFrom, const VSOut& leftTo, const VSOut& rightFrom, const VSOut& rightTo);
+	void DrawFlatTriangle(const VSOut& leftEdgeFrom, const VSOut& leftEdgeTo, const VSOut& rightEdgeFrom, const VSOut& rightEdgeTo);
 
 	#pragma endregion
 };
@@ -300,8 +300,8 @@ inline void GraphicsPipeline<TShaderProgram>::PixelProcessing(int screenX, int s
 		{
 			Vei2 textureCoordinates
 			(
-				std::roundf(fragment.m_UvCoordinates.x * m_TextureWidth),
-				std::roundf((1.0f - fragment.m_UvCoordinates.y) * m_TextureHeight)
+				static_cast<int>(std::roundf(fragment.m_UvCoordinates.x * m_TextureWidth)),
+				static_cast<int>(std::roundf((1.0f - fragment.m_UvCoordinates.y) * m_TextureHeight))
 			);
 
 			int yOffset = textureCoordinates.y * m_TextureWidth;
@@ -384,9 +384,8 @@ inline void GraphicsPipeline<TShaderProgram>::DrawFlatTopTriangle(const VSOut& v
 
 	DrawFlatTriangle
 	(
-		v1, *pv2,
-		v1, *pv2,
-		v1, *pv3
+		*pv2, v1,
+		*pv3, v1
 	);
 }
 
@@ -400,53 +399,46 @@ inline void GraphicsPipeline<TShaderProgram>::DrawFlatBottomTriangle(const VSOut
 
 	DrawFlatTriangle
 	(
-		*pv1, v3,
-		*pv1, v3,
-		*pv2, v3
+		v3, *pv1,
+		v3, *pv2
 	);
 }
 
 template<class TShaderProgram>
-inline void GraphicsPipeline<TShaderProgram>::DrawFlatTriangle(const VSOut& bottom, const VSOut& top, const VSOut& leftFrom, const VSOut& leftTo, const VSOut& rightFrom, const VSOut& rightTo)
+inline void GraphicsPipeline<TShaderProgram>::DrawFlatTriangle(const VSOut& leftEdgeFrom, const VSOut& leftEdgeTo, const VSOut& rightEdgeFrom, const VSOut& rightEdgeTo)
 {
-	// Round because of point sampling (draw pixel if it's center is inside the triangle)
-	int startY = static_cast<int>(std::roundf(bottom.m_Position.y));
-	int endY = static_cast<int>(std::roundf(top.m_Position.y));
-	if (startY == endY) return;
+	// We're always going to send leftEdgeFrom and rightEdgeFrom to be at a lower y coordinate,
+	// which means they are always going to be on the "top" of the triangle
 
-	const float deltaY = static_cast<float>(endY - startY);
+	auto leftEdgeInterpolant = leftEdgeFrom;
+	auto rightEdgeInterpolant = rightEdgeFrom;
 
-	for (int curY = startY; curY >= endY; curY--)
+	const float deltaY = leftEdgeTo.m_Position.y - leftEdgeFrom.m_Position.y;
+	const auto leftStep = (leftEdgeTo - leftEdgeFrom) / deltaY;
+	const auto rightStep = (rightEdgeTo - rightEdgeFrom) / deltaY;
+
+	int startY = std::max(static_cast<int>(std::ceilf(leftEdgeFrom.m_Position.y - 0.5f)), 0);
+	int endY = std::min(static_cast<int>(std::ceilf(leftEdgeTo.m_Position.y - 0.5f)), Graphics::ScreenHeight - 1);
+
+	// Prestep
+	leftEdgeInterpolant += (static_cast<float>(startY) + 0.5f - leftEdgeFrom.m_Position.y) * leftStep;
+	rightEdgeInterpolant += (static_cast<float>(startY) + 0.5f - rightEdgeFrom.m_Position.y) * rightStep;
+
+	for (int curY = startY; curY < endY; curY++, leftEdgeInterpolant += leftStep, rightEdgeInterpolant += rightStep)
 	{
-		if (curY >= Graphics::ScreenHeight)
+		auto xInterpolant = leftEdgeInterpolant;
+
+		const float deltaX = rightEdgeInterpolant.m_Position.x - leftEdgeInterpolant.m_Position.x;
+		const auto xStep = (rightEdgeInterpolant - leftEdgeInterpolant) / deltaX;
+
+		int startX = std::max(static_cast<int>(std::ceilf(leftEdgeInterpolant.m_Position.x - 0.5f)), 0);
+		int endX = std::min(static_cast<int>(std::ceilf(rightEdgeInterpolant.m_Position.x - 0.5f)), Graphics::ScreenWidth - 1);
+
+		xInterpolant += (static_cast<float>(startX) + 0.5f - leftEdgeInterpolant.m_Position.x) * xStep;
+
+		for (int curX = startX; curX < endX; curX++, xInterpolant += xStep)
 		{
-			curY = Graphics::ScreenHeight;
-			continue;
-		}
-		if (curY < 0) break;
-
-		const float tY = (curY - startY) / deltaY;
-		VSOut left = VSOut::Lerp(leftFrom, leftTo, tY);
-		VSOut right = VSOut::Lerp(rightFrom, rightTo, tY);
-
-		int startX = static_cast<int>(std::roundf(left.m_Position.x));
-		int endX = static_cast<int>(std::roundf(right.m_Position.x));
-		if (startX == endX) continue;
-
-		const float deltaX = static_cast<float>(endX - startX);
-
-		for (int curX = startX; curX <= endX; curX++)
-		{
-			if (curX < 0)
-			{
-				curX = -1;
-				continue;
-			}
-			if (curX >= Graphics::ScreenWidth) break;
-
-			const float tX = (curX - startX) / deltaX;
-			VSOut fragment = VSOut::Lerp(left, right, tX);
-
+			auto fragment = xInterpolant;
 			const float w = 1.0f / fragment.m_Position.w;
 			fragment *= w;
 
