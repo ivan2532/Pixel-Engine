@@ -52,7 +52,7 @@ public:
 		}
 		VSOut& operator-=(const VSOut& rhs) { return *this = *this - rhs; }
 
-		friend VSOut operator*(const VSOut& lhs, float rhs)
+		template <typename T> friend VSOut operator*(const VSOut& lhs, T rhs)
 		{
 			return
 			{
@@ -60,10 +60,13 @@ public:
 				lhs.m_Color * rhs
 			};
 		}
-		friend VSOut operator*(float lhs, const VSOut& rhs) { return rhs * lhs; }
-		VSOut& operator*=(float rhs) { return *this = *this * rhs; }
+		template <typename T> friend VSOut operator*(T lhs, const VSOut& rhs) { return rhs * lhs; }
+		template <typename T> VSOut& operator*=(T rhs) { return *this = *this * rhs; }
 
-		static VSOut Lerp(VSOut v1, VSOut v2, float t) { return v1 + (v2 - v1) * t; }
+		template <typename T> friend VSOut operator/(const VSOut& lhs, T rhs) { return lhs * (1.0f / rhs); }
+		template <typename T> VSOut& operator/=(T rhs) { return *this = *this / rhs; }
+
+		template <typename T> static VSOut Lerp(VSOut v1, VSOut v2, T t) { return v1 + (v2 - v1) * t; }
 	};
 
 	class VertexShader
