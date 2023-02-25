@@ -81,19 +81,13 @@
     <ClInclude Include="GraphicsPipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="VertexColorShaderProgram.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DirectionalLightningShaderProgram.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Entity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DirectionalLightningScene.h">
+    <ClInclude Include="ModelPreviewScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="OBJ_Loader.h">
@@ -103,6 +97,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TexturedDirectionalLightningShaderProgram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GnomeFigureDemoScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -137,7 +134,7 @@
     <ClCompile Include="Entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DirectionalLightningTriangleScene.cpp">
+    <ClCompile Include="ModelPreviewScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="stb_implementation.cpp">

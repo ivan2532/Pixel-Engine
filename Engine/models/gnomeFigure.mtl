@@ -1,0 +1,13 @@
+# Blender 3.4.1 MTL File: 'gnome.blend'
+# www.blender.org
+
+newmtl Material.001
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd C:/Users/ivanb/AppData/Local/Temp/Rar$DIa29340.40514/textures/gnome_low_DefaultMaterial_BaseColor.png
+map_Ns C:/Users/ivanb/AppData/Local/Temp/Rar$DIa29340.40514/textures/gnome_low_DefaultMaterial_Roughness.png
+map_refl C:/Users/ivanb/AppData/Local/Temp/Rar$DIa29340.40514/textures/gnome_low_DefaultMaterial_Metallic.png

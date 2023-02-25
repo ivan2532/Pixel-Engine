@@ -141,14 +141,13 @@
     <ClInclude Include="ChiliWin.h" />
     <ClInclude Include="Colors.h" />
     <ClInclude Include="COMInitializer.h" />
-    <ClInclude Include="DirectionalLightningShaderProgram.h" />
-    <ClInclude Include="DirectionalLightningScene.h" />
+    <ClInclude Include="ModelPreviewScene.h" />
     <ClInclude Include="Entity.h" />
+    <ClInclude Include="GnomeFigureDemoScene.h" />
     <ClInclude Include="OBJ_Loader.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="TexturedDirectionalLightningShaderProgram.h" />
-    <ClInclude Include="VertexColorShaderProgram.h" />
     <ClInclude Include="DXErr.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Graphics.h" />
@@ -169,7 +168,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="COMInitializer.cpp" />
-    <ClCompile Include="DirectionalLightningTriangleScene.cpp" />
+    <ClCompile Include="ModelPreviewScene.cpp" />
     <ClCompile Include="DXErr.cpp" />
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="Game.cpp" />

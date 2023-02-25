@@ -98,10 +98,14 @@ public:
 
 		void SetMVP(const Mat4& value) { m_MVP = value; }
 		void SetMV(const Mat4& value) { m_MV = value; }
+		void SetP(const Mat4& value) { m_P = value; }
+
+		Mat4 GetP() { return m_P; }
 
 	private:
 		Mat4 m_MVP;
 		Mat4 m_MV;
+		Mat4 m_P;
 	};
 
 	struct PSOut
