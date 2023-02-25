@@ -292,37 +292,36 @@ inline void GraphicsPipeline<TShaderProgram>::Rasterization(const VSOut& v1, con
 template<class TShaderProgram>
 inline void GraphicsPipeline<TShaderProgram>::PixelProcessing(int screenX, int screenY, VSOut& fragment)
 {
-	if (fragment.m_Position.z < zBuffer[screenY][screenX])
+	if (fragment.m_Position.z >= zBuffer[screenY][screenX]) return;
+
+	zBuffer[screenY][screenX] = fragment.m_Position.z;
+
+	if (m_TextureData != nullptr)
 	{
-		zBuffer[screenY][screenX] = fragment.m_Position.z;
+		Vei2 textureCoordinates
+		(
+			static_cast<int>(fragment.m_UvCoordinates.x * m_TextureWidth),
+			static_cast<int>((1.0f - fragment.m_UvCoordinates.y) * m_TextureHeight)
+		);
 
-		if (m_TextureData != nullptr)
-		{
-			Vei2 textureCoordinates
-			(
-				static_cast<int>(std::roundf(fragment.m_UvCoordinates.x * m_TextureWidth)),
-				static_cast<int>(std::roundf((1.0f - fragment.m_UvCoordinates.y) * m_TextureHeight))
-			);
+		int yOffset = textureCoordinates.y * m_TextureWidth;
+		int xOffset = textureCoordinates.x;
 
-			int yOffset = textureCoordinates.y * m_TextureWidth;
-			int xOffset = textureCoordinates.x;
+		int textureArrayIndex = std::min((yOffset + xOffset) * 3, (m_TextureWidth * m_TextureHeight) * 3 - 1);
 
-			int textureArrayIndex = std::min((yOffset + xOffset) * 3, (m_TextureWidth * m_TextureHeight) * 3 - 1);
-
-			fragment.m_Color = Vec3
-			(
-				static_cast<float>(m_TextureData[textureArrayIndex]) / 255.0f,
-				static_cast<float>(m_TextureData[textureArrayIndex + 1]) / 255.0f,
-				static_cast<float>(m_TextureData[textureArrayIndex + 2]) / 255.0f
-			);
-		}
-		else
-		{
-			fragment.m_Color = Vec3::One();
-		}
-
-		Merging(screenX, screenY, m_PixelShader.Main(fragment));
+		fragment.m_Color = Vec3
+		(
+			static_cast<float>(m_TextureData[textureArrayIndex]) / 255.0f,
+			static_cast<float>(m_TextureData[textureArrayIndex + 1]) / 255.0f,
+			static_cast<float>(m_TextureData[textureArrayIndex + 2]) / 255.0f
+		);
 	}
+	else
+	{
+		fragment.m_Color = Vec3::One();
+	}
+
+	Merging(screenX, screenY, m_PixelShader.Main(fragment));
 }
 
 template<class TShaderProgram>
