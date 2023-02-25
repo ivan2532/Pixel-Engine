@@ -30,7 +30,10 @@ public:
 	const std::vector<Vec2>& GetUvCoordinates() const;
 
 	void SetPosition(const Vec3& position);
+	Vec3 GetPosition();
+
 	void SetRotation(const Vec3& eulerAngles);
+	Vec3 GetRotation();
 
 	void Translate(const Vec3& translation);
 	void Rotate(const Vec3& rotation);

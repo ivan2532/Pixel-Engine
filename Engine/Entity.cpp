@@ -48,9 +48,19 @@ void Entity::SetPosition(const Vec3& position)
 	m_Position = position;
 }
 
+Vec3 Entity::GetPosition()
+{
+	return m_Position;
+}
+
 void Entity::SetRotation(const Vec3& eulerAngles)
 {
 	m_EulerAngles = eulerAngles;
+}
+
+Vec3 Entity::GetRotation()
+{
+	return m_EulerAngles;
 }
 
 void Entity::Translate(const Vec3& translation)

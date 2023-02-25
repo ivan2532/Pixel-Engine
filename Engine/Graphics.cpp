@@ -304,7 +304,7 @@ void Graphics::EndFrame()
 void Graphics::BeginFrame()
 {
 	// clear the sysbuffer
-	memset( pSysBuffer,0u,sizeof( Color ) * Graphics::ScreenHeight * Graphics::ScreenWidth );
+	memset( pSysBuffer,bgColor,sizeof( Color ) * Graphics::ScreenHeight * Graphics::ScreenWidth );
 }
 
 void Graphics::PutPixel( int x,int y,Color c )
@@ -314,6 +314,11 @@ void Graphics::PutPixel( int x,int y,Color c )
 	assert( y >= 0 );
 	assert( y < int( Graphics::ScreenHeight ) );
 	pSysBuffer[Graphics::ScreenWidth * y + x] = c;
+}
+
+void Graphics::SetBackgroundColor(unsigned char value)
+{
+	bgColor = value;
 }
 
 

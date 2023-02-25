@@ -3,12 +3,16 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include <sstream>
+
 DirectionalLightningScene::DirectionalLightningScene(Graphics& graphics, MainWindow& window)
 	:
 	m_Pipeline(graphics),
 	m_Window(window),
 	m_Model("models/box.obj")
 {
+	graphics.SetBackgroundColor(200u);
+
 	auto vertices = m_Model.GetVertices();
 	auto uvCoordinates = m_Model.GetUvCoordinates();
 	auto normals = m_Model.GetNormals();
@@ -23,6 +27,8 @@ DirectionalLightningScene::DirectionalLightningScene(Graphics& graphics, MainWin
 
 void DirectionalLightningScene::Start()
 {
+	m_Model.SetPosition({ 0.0f, 0.0f, 1.65f });
+	m_Model.SetRotation({ 0.95f, 0.0f, 0.0f });
 	m_CameraPosition = { 0.0f, 0.0f, 5.0f };
 }
 
