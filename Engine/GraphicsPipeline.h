@@ -143,9 +143,9 @@ inline void GraphicsPipeline<TShaderProgram>::VertexProcessing()
 {
 	m_TransformedVertices.clear();
 
-	for (const auto& vertex : m_InputVertices)
+	for (const auto& index : m_InputIndices)
 	{
-		m_TransformedVertices.push_back(m_VertexShader.Main(vertex));
+		m_TransformedVertices.push_back(m_VertexShader.Main(m_InputVertices[index]));
 	}
 
 	TriangleAssembly();
