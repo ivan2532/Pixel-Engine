@@ -61,7 +61,6 @@ private:
 	void ScreenMapping(VSOut v1, VSOut v2, VSOut v3);
 	void Rasterization(const VSOut& v1, const VSOut& v2, const VSOut& v3);
 	void PixelProcessing(int screenX, int screenY, VSOut& fragment);
-	void Merging(int screenX, int screenY, PSOut p);
 
 	#pragma endregion
 
@@ -321,13 +320,7 @@ inline void GraphicsPipeline<TShaderProgram>::PixelProcessing(int screenX, int s
 		fragment.m_Color = Vec3::One();
 	}
 
-	Merging(screenX, screenY, m_PixelShader.Main(fragment));
-}
-
-template<class TShaderProgram>
-inline void GraphicsPipeline<TShaderProgram>::Merging(int screenX, int screenY, PSOut p)
-{
-	m_Graphics.PutPixel(screenX, screenY, p.m_Color);
+	m_Graphics.PutPixel(screenX, screenY, m_PixelShader.Main(fragment).m_Color);
 }
 
 template<class TShaderProgram>
