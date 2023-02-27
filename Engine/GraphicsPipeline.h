@@ -27,7 +27,7 @@ public:
 	PixelShader& GetPixelShader() { return m_PixelShader; }
 
 	void BindIndices(const std::vector<size_t>& indices);
-	void BindVertices(const std::vector<VSIn>& input);
+	void BindVertices(const std::vector<VSIn>& vertices);
 
 	void LoadTexture(const std::string& path);
 	void UnloadTexture();
@@ -51,7 +51,6 @@ private:
 	unsigned char* m_TextureData = nullptr;
 	int m_TextureWidth = 0;
 	int m_TextureHeight = 0;
-	int m_TextureNumOfChannels = 0;
 
 	#pragma region Pipeline stages
 
@@ -113,16 +112,18 @@ inline void GraphicsPipeline<TShaderProgram>::BindIndices(const std::vector<size
 }
 
 template<class TShaderProgram>
-inline void GraphicsPipeline<TShaderProgram>::BindVertices(const std::vector<VSIn>& input)
+inline void GraphicsPipeline<TShaderProgram>::BindVertices(const std::vector<VSIn>& vertices)
 {
-	m_InputVertices = input;
+	m_InputVertices = vertices;
 }
 
 template<class TShaderProgram>
 inline void GraphicsPipeline<TShaderProgram>::LoadTexture(const std::string& path)
 {
 	UnloadTexture();
-	m_TextureData = stbi_load(path.c_str(), &m_TextureWidth, &m_TextureHeight, &m_TextureNumOfChannels, 3);
+
+	int discard;
+	m_TextureData = stbi_load(path.c_str(), &m_TextureWidth, &m_TextureHeight, &discard, 3);
 }
 
 template<class TShaderProgram>
