@@ -279,7 +279,6 @@ template<class TShaderProgram>
 inline void GraphicsPipeline<TShaderProgram>::Rasterization(const VSOut& v1, const VSOut& v2, const VSOut& v3)
 {
 	// Sort vertices by y (from bottom to top on screen)
-	// because the order could be messed up from clipping
 	const VSOut* pv1 = &v1;
 	const VSOut* pv2 = &v2;
 	const VSOut* pv3 = &v3;
