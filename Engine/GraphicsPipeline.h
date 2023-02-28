@@ -164,7 +164,11 @@ inline void GraphicsPipeline<TShaderProgram>::TriangleAssembly()
 template<class TShaderProgram>
 inline void GraphicsPipeline<TShaderProgram>::Clipping(VSOut& v1, VSOut& v2, VSOut& v3)
 {
-	// Clip triangles completley out of the view volume
+	// Cull triangles completley out of the view volume
+	// Near and far plane
+	if (v1.m_Position.z <= -v1.m_Position.w && v2.m_Position.z <= -v2.m_Position.w && v3.m_Position.z <= -v3.m_Position.w) return;
+	if (v1.m_Position.z >= v1.m_Position.w && v2.m_Position.z >= v2.m_Position.w && v3.m_Position.z >= v3.m_Position.w) return;
+
 	// Left and right plane
 	if (v1.m_Position.x <= -v1.m_Position.w && v2.m_Position.x <= -v2.m_Position.w && v3.m_Position.x <= -v3.m_Position.w) return;
 	if (v1.m_Position.x >= v1.m_Position.w && v2.m_Position.x >= v2.m_Position.w && v3.m_Position.x >= v3.m_Position.w) return;
@@ -173,10 +177,6 @@ inline void GraphicsPipeline<TShaderProgram>::Clipping(VSOut& v1, VSOut& v2, VSO
 	if (v1.m_Position.y <= -v1.m_Position.w && v2.m_Position.y <= -v2.m_Position.w && v3.m_Position.y <= -v3.m_Position.w) return;
 	if (v1.m_Position.y >= v1.m_Position.w && v2.m_Position.y >= v2.m_Position.w && v3.m_Position.y >= v3.m_Position.w) return;
 
-	// Near and far plane
-	if (v1.m_Position.z <= -v1.m_Position.w && v2.m_Position.z <= -v2.m_Position.w && v3.m_Position.z <= -v3.m_Position.w) return;
-	if (v1.m_Position.z >= v1.m_Position.w && v2.m_Position.z >= v2.m_Position.w && v3.m_Position.z >= v3.m_Position.w) return;
-	
 	// Sort vertices by x (descending)
 	if (v1.m_Position.x < v2.m_Position.x) std::swap(v1, v2);
 	if (v2.m_Position.x < v3.m_Position.x) std::swap(v2, v3);
