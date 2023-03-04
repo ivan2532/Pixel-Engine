@@ -8,7 +8,7 @@ The Pixel Engine was made in the [Chilli DirectX Framework](https://github.com/p
 The only requirement is that you will need to use Windows to run the project, since it uses DirectX in the background.
 
 ## Running the Project
-After cloning the project, you should be able to run the project in Visual Studio without any problems. If you get any errors, try setting the C++ standard to C++14, this can happened to me after cloning the [Chilli DirectX Framework](https://github.com/planetchili/chili_framework).
+After cloning the project, you should be able to run it in Visual Studio without any problems. If you get any errors, try setting the C++ standard to C++14, this can happened to me after cloning the [Chilli DirectX Framework](https://github.com/planetchili/chili_framework).
 
 ## Documentation
 You can find a document that discusses all the theory behind the engine and its implementation in detail [here](https://docs.google.com/document/d/1xWjy3uPwlTREEfZ6n3kIMqPDFHllUxOU0w7RhLeziE0/edit?usp=sharing).
